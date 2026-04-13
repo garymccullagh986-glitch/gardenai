@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a2e1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GardenAI">
+<title>GardenAI</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0f1a0f;
+  --bg2: #162016;
+  --bg3: #1e2e1e;
+  --bg4: #253025;
+  --card: #1a271a;
+  --border: rgba(120,180,90,0.15);
+  --border2: rgba(120,180,90,0.28);
+  --green: #7eb85a;
+  --green2: #a3d47a;
+  --green3: #c8eaa4;
+  --amber: #d4a843;
+  --amber2: #f0c96a;
+  --text: #e8f0e0;
+  --text2: #a8bc98;
+  --text3: #6a8060;
+  --danger: #e07070;
+  --radius: 14px;
+  --radius2: 20px;
+  --font-serif: 'Lora', Georgia, serif;
+  --font-sans: 'DM Sans', sans-serif;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font-sans);}
+
+/* ── LAYOUT ── */
+.shell{display:flex;flex-direction:column;height:100%;padding-top:var(--safe-top);}
+.topbar{padding:14px 20px 10px;background:var(--bg);border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-family:var(--font-serif);font-size:20px;color:var(--green2);letter-spacing:-0.3px;}
+.topbar-sub{font-size:11px;color:var(--text3);margin-top:1px;}
+.user-btn{width:34px;height:34px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(70px + var(--safe-bottom));}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:0.5px solid var(--border);display:flex;padding-bottom:var(--safe-bottom);z-index:100;}
+.nav-btn{flex:1;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:none;}
+.nav-icon{font-size:20px;line-height:1;}
+.nav-label{font-size:10px;color:var(--text3);font-weight:400;letter-spacing:0.3px;}
+.nav-btn.active .nav-icon{filter:drop-shadow(0 0 6px var(--green));}
+.nav-btn.active .nav-label{color:var(--green2);}
+
+/* ── PANELS ── */
+.panel{display:none;padding:16px;}
+.panel.active{display:block;}
+
+/* ── AUTH SCREEN ── */
+.auth-screen{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 32px;text-align:center;}
+.auth-logo{font-family:var(--font-serif);font-size:42px;color:var(--green2);margin-bottom:8px;}
+.auth-tagline{font-size:14px;color:var(--text2);margin-bottom:48px;line-height:1.5;}
+.auth-leaf{font-size:64px;margin-bottom:32px;display:block;}
+.google-btn{display:flex;align-items:center;gap:10px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);padding:14px 24px;font-size:15px;color:var(--text);cursor:pointer;font-family:var(--font-sans);font-weight:500;width:100%;max-width:280px;justify-content:center;}
+.auth-skip{margin-top:16px;font-size:13px;color:var(--text3);cursor:pointer;text-decoration:underline;}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius2);padding:16px;margin-bottom:12px;}
+.card-title{font-family:var(--font-serif);font-size:16px;color:var(--green3);margin-bottom:4px;}
+.card-sub{font-size:12px;color:var(--text3);}
+.section-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;font-weight:500;}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;}
+.badge-green{background:rgba(126,184,90,0.18);color:var(--green2);}
+.badge-amber{background:rgba(212,168,67,0.18);color:var(--amber2);}
+.badge-red{background:rgba(224,112,112,0.18);color:var(--danger);}
+
+/* ── UPLOAD / PHOTO ── */
+.upload-zone{border:1.5px dashed var(--border2);border-radius:var(--radius2);padding:28px 16px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg2);}
+.upload-zone:active{background:var(--bg3);}
+.upload-zone p{font-size:13px;color:var(--text3);margin-top:6px;}
+.upload-zone strong{color:var(--text2);}
+.upload-icon{font-size:36px;}
+.preview-wrap{position:relative;margin:12px 0;}
+.preview-wrap img{width:100%;border-radius:var(--radius);border:0.5px solid var(--border);max-height:240px;object-fit:cover;display:block;}
+.remove-btn{position:absolute;top:8px;right:8px;background:rgba(15,26,15,0.8);border:0.5px solid var(--border2);border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:13px;color:var(--text2);display:flex;align-items:center;justify-content:center;}
+.row{display:flex;gap:8px;margin:10px 0;}
+.row select,.row input{flex:1;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:13px;color:var(--text);font-family:var(--font-sans);-webkit-appearance:none;appearance:none;}
+select option{background:var(--bg3);}
+.primary-btn{width:100%;padding:13px;background:var(--green);border:none;border-radius:var(--radius);font-size:15px;font-weight:500;color:#0f1a0f;cursor:pointer;font-family:var(--font-sans);transition:opacity 0.15s;margin-top:4px;}
+.primary-btn:disabled{opacity:0.35;cursor:not-allowed;}
+.primary-btn:active:not(:disabled){opacity:0.8;}
+.result-box{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-top:12px;font-size:14px;line-height:1.75;color:var(--text2);}
+.result-box h4{font-family:var(--font-serif);color:var(--green2);margin-bottom:8px;font-size:15px;}
+.save-row{display:flex;gap:8px;margin-top:10px;}
+.save-row input{flex:1;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:13px;color:var(--text);font-family:var(--font-sans);}
+.ghost-btn{padding:9px 16px;background:transparent;border:0.5px solid var(--border2);border-radius:var(--radius);font-size:13px;color:var(--text2);cursor:pointer;font-family:var(--font-sans);white-space:nowrap;}
+.ghost-btn:active{background:var(--bg3);}
+
+/* ── CHAT ── */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 180px);min-height:300px;}
+.chat-msgs{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;padding:4px 0 12px;}
+.msg{max-width:86%;padding:10px 14px;font-size:14px;line-height:1.65;}
+.msg.user{align-self:flex-end;background:var(--bg4);border:0.5px solid var(--border2);border-radius:18px 18px 4px 18px;color:var(--text);}
+.msg.ai{align-self:flex-start;background:var(--bg3);border:0.5px solid var(--border);border-radius:18px 18px 18px 4px;color:var(--text2);}
+.msg.ai.typing{color:var(--text3);font-style:italic;}
+.quick-pills{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.quick-pills::-webkit-scrollbar{display:none;}
+.pill{white-space:nowrap;font-size:12px;padding:6px 12px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:20px;color:var(--text2);cursor:pointer;flex-shrink:0;}
+.pill:active{background:var(--bg4);}
+.chat-input-row{display:flex;gap:8px;padding-top:10px;border-top:0.5px solid var(--border);}
+.chat-input-row input{flex:1;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 14px;font-size:14px;color:var(--text);font-family:var(--font-sans);}
+.chat-input-row input::placeholder{color:var(--text3);}
+.send-btn{padding:10px 16px;background:var(--green);border:none;border-radius:var(--radius);font-size:14px;font-weight:500;color:#0f1a0f;cursor:pointer;font-family:var(--font-sans);}
+.send-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+/* ── CALENDAR ── */
+.month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.month-title{font-family:var(--font-serif);font-size:20px;color:var(--green2);}
+.month-arrow{background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:7px 14px;font-size:16px;color:var(--text2);cursor:pointer;}
+.task-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border);}
+.task-item:last-child{border-bottom:none;}
+.task-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.task-dot.green{background:var(--green);}
+.task-dot.amber{background:var(--amber);}
+.task-dot.blue{background:#6aabcf;}
+.task-content{flex:1;}
+.task-title{font-size:14px;color:var(--text);font-weight:500;margin-bottom:2px;}
+.task-desc{font-size:12px;color:var(--text3);line-height:1.5;}
+.urgency-bar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+
+/* ── JOURNAL ── */
+.journal-entry{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius2);padding:14px;margin-bottom:10px;cursor:pointer;}
+.entry-header{display:flex;justify-content:space-between;align-items:flex-start;}
+.entry-title{font-family:var(--font-serif);font-size:15px;color:var(--green3);}
+.entry-date{font-size:11px;color:var(--text3);}
+.entry-preview{font-size:13px;color:var(--text3);margin-top:6px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.entry-img{width:100%;height:100px;object-fit:cover;border-radius:10px;margin-top:8px;}
+.fab{position:fixed;bottom:calc(80px + var(--safe-bottom));right:20px;width:52px;height:52px;border-radius:50%;background:var(--green);border:none;font-size:24px;color:#0f1a0f;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(126,184,90,0.35);z-index:50;}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;display:flex;align-items:flex-end;}
+.modal{background:var(--bg2);border-radius:var(--radius2) var(--radius2) 0 0;border-top:0.5px solid var(--border2);padding:20px 20px calc(20px + var(--safe-bottom));width:100%;max-height:85vh;overflow-y:auto;}
+.modal-title{font-family:var(--font-serif);font-size:18px;color:var(--green2);margin-bottom:16px;}
+.modal textarea{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px;font-size:14px;color:var(--text);font-family:var(--font-sans);min-height:100px;resize:none;margin-bottom:10px;}
+.modal input[type=text]{width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:11px 12px;font-size:14px;color:var(--text);font-family:var(--font-sans);margin-bottom:10px;}
+.modal-actions{display:flex;gap:8px;margin-top:6px;}
+.modal-actions .primary-btn{margin-top:0;}
+.entry-detail-content{font-size:14px;color:var(--text2);line-height:1.75;margin-top:10px;white-space:pre-wrap;}
+.entry-detail-img{width:100%;border-radius:var(--radius);margin:10px 0;}
+.delete-btn{padding:9px 16px;background:transparent;border:0.5px solid rgba(224,112,112,0.4);border-radius:var(--radius);font-size:13px;color:var(--danger);cursor:pointer;font-family:var(--font-sans);}
+.loading-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(126,184,90,0.3);border-top-color:var(--green);border-radius:50%;animation:spin 0.7s linear infinite;margin-right:6px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:48px 24px;color:var(--text3);}
+.empty-state .es-icon{font-size:40px;margin-bottom:12px;}
+.empty-state p{font-size:14px;line-height:1.6;}
+input::placeholder,textarea::placeholder{color:var(--text3);}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--border2);}
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div class="auth-screen" id="auth-screen">
+  <span class="auth-leaf">🌿</span>
+  <div class="auth-logo">GardenAI</div>
+  <p class="auth-tagline">Your intelligent UK garden companion.<br>Identify, diagnose, and care for your plants.</p>
+  <button class="google-btn" onclick="signInWithGoogle()">
+    <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+    Sign in with Google
+  </button>
+  <p class="auth-skip" onclick="skipAuth()">Continue without signing in</p>
+</div>
+
+<!-- MAIN APP -->
+<div class="shell" id="app" style="display:none">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">🌿 GardenAI</div>
+      <div class="topbar-sub" id="topbar-sub">Your garden companion</div>
+    </div>
+    <div class="user-btn" onclick="showUserMenu()" id="user-btn">👤</div>
+  </div>
+
+  <div class="content">
+    <!-- ANALYSE PANEL -->
+    <div class="panel active" id="panel-analyse">
+      <div class="section-label">Photo Analysis</div>
+      <div class="upload-zone" onclick="document.getElementById('file-input').click()" id="upload-zone">
+        <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleFile(event)" style="display:none">
+        <div class="upload-icon">📷</div>
+        <p><strong>Take a photo or upload</strong></p>
+        <p>Point at any plant, lawn, or leaves</p>
+      </div>
+      <div class="preview-wrap" id="preview-wrap" style="display:none">
+        <img id="preview-img" src="" alt="Plant photo">
+        <button class="remove-btn" onclick="removeImage()">✕</button>
+      </div>
+      <div class="row">
+        <select id="plant-type">
+          <option value="">Plant type (optional)</option>
+          <option>Lawn / grass</option>
+          <option>Shrub / hedge</option>
+          <option>Lavender</option>
+          <option>Heathers / heath</option>
+          <option>Ornamental grass</option>
+          <option>Pieris</option>
+          <option>Sarcococca</option>
+          <option>Hebe</option>
+          <option>Vegetable / fruit</option>
+          <option>Houseplant</option>
+          <option>Tree</option>
+          <option>Rose</option>
+          <option>Weed identification</option>
+          <option>Other</option>
+        </select>
+        <select id="concern">
+          <option value="">Concern (optional)</option>
+          <option>General health check</option>
+          <option>Yellowing leaves</option>
+          <option>Brown patches</option>
+          <option>Pests / insects</option>
+          <option>Disease / fungus</option>
+          <option>Not flowering</option>
+          <option>Wilting / drooping</option>
+          <option>Watering advice</option>
+          <option>Feeding advice</option>
+          <option>Identify this plant</option>
+        </select>
+      </div>
+      <button class="primary-btn" id="analyse-btn" onclick="analysePhoto()" disabled>Analyse Photo</button>
+      <div id="photo-result"></div>
+    </div>
+
+    <!-- CHAT PANEL -->
+    <div class="panel" id="panel-chat">
+      <div class="section-label">Garden Q&amp;A</div>
+      <div class="quick-pills" id="quick-pills">
+        <div class="pill" onclick="sendQuick('Why are my lawn edges turning yellow in spring?')">Yellow lawn edges?</div>
+        <div class="pill" onclick="sendQuick('When should I feed my lavender in the UK?')">Feed lavender?</div>
+        <div class="pill" onclick="sendQuick('How do I get rid of bindweed permanently?')">Bindweed help</div>
+        <div class="pill" onclick="sendQuick('Best time to overseed a lawn in the UK?')">Overseeding timing?</div>
+        <div class="pill" onclick="sendQuick('How do I care for Pieris Forest Flame?')">Pieris care?</div>
+        <div class="pill" onclick="sendQuick('Is my Sarcococca suitable for shade?')">Sarcococca in shade?</div>
+        <div class="pill" onclick="sendQuick('What should I do with my garden in April?')">April tasks?</div>
+      </div>
+      <div class="chat-wrap">
+        <div class="chat-msgs" id="chat-msgs">
+          <div class="msg ai">Hi! I'm your UK garden expert 🌿 Ask me anything about your plants, lawn, pests, feeding schedules — whatever's on your mind.</div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chat-input" placeholder="Ask about your garden..." onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="send-btn" id="send-btn" onclick="sendChat()">→</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR PANEL -->
+    <div class="panel" id="panel-calendar">
+      <div class="month-nav">
+        <button class="month-arrow" onclick="changeMonth(-1)">‹</button>
+        <div class="month-title" id="month-title">April</div>
+        <button class="month-arrow" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="urgency-bar" id="urgency-bar"></div>
+      <div class="card">
+        <div class="section-label" style="margin-bottom:12px">Tasks this month</div>
+        <div id="calendar-tasks"></div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="card-title" id="weather-tip-title">Seasonal tip</div>
+        <div class="result-box" id="seasonal-tip" style="margin-top:8px;background:transparent;border:none;padding:0"></div>
+      </div>
+    </div>
+
+    <!-- JOURNAL PANEL -->
+    <div class="panel" id="panel-journal">
+      <div class="section-label">Plant Journal</div>
+      <div id="journal-list"></div>
+      <div class="empty-state" id="journal-empty" style="display:none">
+        <div class="es-icon">📔</div>
+        <p>No entries yet.<br>Save your photo analyses or add notes about your plants.</p>
+      </div>
+    </div>
+
+    <!-- SETTINGS PANEL -->
+    <div class="panel" id="panel-settings">
+      <div class="section-label">Settings</div>
+      <div class="card">
+        <div class="card-title">Anthropic API Key</div>
+        <div class="card-sub" style="margin-bottom:12px">Stored only on this device — never shared anywhere except the Anthropic API.</div>
+        <input type="password" id="settings-key" placeholder="sk-ant-api03-..." style="width:100%;background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:11px 12px;font-size:14px;color:var(--text);font-family:var(--font-sans);margin-bottom:10px;">
+        <div style="display:flex;gap:8px">
+          <button class="ghost-btn" onclick="toggleKeyVisibility()">Show</button>
+          <button class="primary-btn" style="flex:1;margin-top:0" onclick="saveApiKey()">Save key</button>
+        </div>
+        <div id="settings-msg" style="font-size:13px;margin-top:10px;min-height:18px"></div>
+      </div>
+      <div class="card" style="margin-top:4px">
+        <div class="card-title" style="margin-bottom:8px">Where to get your key</div>
+        <div style="font-size:13px;color:var(--text3);line-height:1.8">
+          1. Go to <span style="color:var(--green2)">console.anthropic.com</span><br>
+          2. Click <strong style="color:var(--text2)">API Keys</strong> in the left sidebar<br>
+          3. Click <strong style="color:var(--text2)">Create Key</strong><br>
+          4. Copy it and paste it above<br><br>
+          Your existing Anthropic credit carries over — no new account needed.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="switchPanel('analyse',this)">
+      <span class="nav-icon">📷</span>
+      <span class="nav-label">Analyse</span>
+    </button>
+    <button class="nav-btn" onclick="switchPanel('chat',this)">
+      <span class="nav-icon">💬</span>
+      <span class="nav-label">Ask</span>
+    </button>
+    <button class="nav-btn" onclick="switchPanel('calendar',this)">
+      <span class="nav-icon">📅</span>
+      <span class="nav-label">Calendar</span>
+    </button>
+    <button class="nav-btn" onclick="switchPanel('journal',this)">
+      <span class="nav-icon">📔</span>
+      <span class="nav-label">Journal</span>
+    </button>
+    <button class="nav-btn" onclick="switchPanel('settings',this)">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Settings</span>
+    </button>
+  </nav>
+
+  <!-- FAB for journal -->
+  <button class="fab" id="fab" style="display:none" onclick="openNewEntry()">+</button>
+</div>
+
+<!-- JOURNAL ENTRY MODAL -->
+<div class="modal-overlay" id="modal-new" style="display:none" onclick="closeModalOnOverlay(event,'modal-new')">
+  <div class="modal">
+    <div class="modal-title">New Journal Entry</div>
+    <input type="text" id="entry-name" placeholder="Plant name (e.g. Front garden lavender)">
+    <textarea id="entry-notes" placeholder="Notes — how it looks, what you did, any concerns..."></textarea>
+    <div id="entry-photo-preview" style="display:none"><img id="entry-photo-img" style="width:100%;border-radius:10px;margin-bottom:10px;max-height:160px;object-fit:cover"></div>
+    <div class="modal-actions">
+      <button class="ghost-btn" onclick="closeModal('modal-new')">Cancel</button>
+      <button class="primary-btn" style="flex:1" onclick="saveEntry()">Save entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- JOURNAL DETAIL MODAL -->
+<div class="modal-overlay" id="modal-detail" style="display:none" onclick="closeModalOnOverlay(event,'modal-detail')">
+  <div class="modal" id="modal-detail-content"></div>
+</div>
+
+<!-- USER MODAL -->
+<div class="modal-overlay" id="modal-user" style="display:none" onclick="closeModalOnOverlay(event,'modal-user')">
+  <div class="modal">
+    <div class="modal-title" id="user-modal-name">Account</div>
+    <p id="user-modal-email" style="font-size:13px;color:var(--text3);margin-bottom:16px"></p>
+    <button class="ghost-btn" style="width:100%;margin-bottom:8px" onclick="signOut()">Sign out</button>
+    <button class="ghost-btn" style="width:100%" onclick="closeModal('modal-user')">Close</button>
+  </div>
+</div>
+
+<!-- Firebase + App Script -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut as fbSignOut } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ── FIREBASE CONFIG ── Replace with your own from Firebase console
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getFirestore(fbApp);
+let currentUser = null;
+let journalEntries = [];
+let imageBase64 = null;
+let imageMime = 'image/jpeg';
+let pendingSaveResult = null;
+let chatHistory = [];
+
+// ── AUTH ──
+window.signInWithGoogle = async () => {
+  const provider = new GoogleAuthProvider();
+  try { await signInWithPopup(auth, provider); } catch(e){ console.error(e); }
+};
+window.skipAuth = () => {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  renderCalendar();
+  renderJournal();
+};
+window.showUserMenu = () => {
+  if (!currentUser) return;
+  document.getElementById('user-modal-name').textContent = currentUser.displayName || 'User';
+  document.getElementById('user-modal-email').textContent = currentUser.email || '';
+  document.getElementById('modal-user').style.display = 'flex';
+};
+window.signOut = async () => {
+  await fbSignOut(auth);
+  closeModal('modal-user');
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  currentUser = null;
+  journalEntries = [];
+  renderJournal();
+};
+onAuthStateChanged(auth, user => {
+  currentUser = user;
+  if (user) {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    document.getElementById('topbar-sub').textContent = user.displayName || 'Your garden companion';
+    document.getElementById('user-btn').textContent = (user.displayName || 'U')[0].toUpperCase();
+    loadJournal();
+    renderCalendar();
+  }
+});
+
+// ── NAVIGATION ──
+window.switchPanel = (name, btn) => {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('fab').style.display = name === 'journal' ? 'flex' : 'none';
+  if (name === 'calendar') renderCalendar();
+};
+
+// ── PHOTO ANALYSIS ──
+window.handleFile = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  imageMime = file.type || 'image/jpeg';
+  const reader = new FileReader();
+  reader.onload = ev => {
+    imageBase64 = ev.target.result.split(',')[1];
+    document.getElementById('preview-img').src = ev.target.result;
+    document.getElementById('preview-wrap').style.display = 'block';
+    document.getElementById('analyse-btn').disabled = false;
+    document.getElementById('upload-zone').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+};
+window.removeImage = () => {
+  imageBase64 = null;
+  document.getElementById('preview-wrap').style.display = 'none';
+  document.getElementById('upload-zone').style.display = 'block';
+  document.getElementById('file-input').value = '';
+  document.getElementById('analyse-btn').disabled = true;
+  document.getElementById('photo-result').innerHTML = '';
+  pendingSaveResult = null;
+};
+window.analysePhoto = async () => {
+  if (!imageBase64) return;
+  const plantType = document.getElementById('plant-type').value;
+  const concern = document.getElementById('concern').value;
+  const btn = document.getElementById('analyse-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spinner"></span>Analysing…';
+  const resultDiv = document.getElementById('photo-result');
+  resultDiv.innerHTML = '';
+
+  let prompt = `You are an expert UK gardener and plant diagnostician. Analyse this photo carefully.
+${plantType ? 'Plant type: '+plantType : ''}
+${concern ? 'Concern: '+concern : ''}
+
+Respond with:
+**What I can see:** (1-2 sentences describing the plant/lawn and any visible issues)
+**Diagnosis:** (what's going on, if anything)
+**Action steps:** (3-5 numbered, specific, UK-relevant tips)
+**Seasonal note:** (anything relevant for the current UK season)
+
+Keep it practical and direct. No filler.`;
+
+  try {
+    const resp = await callAnthropic({
+      messages:[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:imageMime,data:imageBase64}},
+        {type:'text',text:prompt}
+      ]}]
+    });
+    pendingSaveResult = resp;
+    resultDiv.innerHTML = `
+      <div class="result-box">
+        <h4>Analysis result</h4>
+        <div>${formatMarkdown(resp)}</div>
+      </div>
+      <div class="save-row">
+        <input type="text" id="save-name" placeholder="Name this plant (optional)">
+        <button class="ghost-btn" onclick="saveToJournal()">Save to journal</button>
+      </div>`;
+  } catch(err) {
+    resultDiv.innerHTML = `<div class="result-box" style="color:var(--danger)">${err.message==='NO_KEY' ? 'No API key set — tap the ⚙ Settings tab to add your Anthropic key.' : 'Something went wrong. Check your API key in Settings and try again.'}</div>`;
+  }
+  btn.disabled = false;
+  btn.textContent = 'Analyse Photo';
+};
+
+// ── CHAT ──
+window.sendQuick = (text) => {
+  document.getElementById('chat-input').value = text;
+  sendChat();
+};
+window.sendChat = async () => {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  const msgs = document.getElementById('chat-msgs');
+  const sendBtn = document.getElementById('send-btn');
+  sendBtn.disabled = true;
+  chatHistory.push({role:'user',content:text});
+  msgs.innerHTML += `<div class="msg user">${escHtml(text)}</div>`;
+  msgs.innerHTML += `<div class="msg ai typing" id="ai-typing">Thinking…</div>`;
+  msgs.scrollTop = msgs.scrollHeight;
+
+  try {
+    const reply = await callAnthropic({
+      system:'You are a friendly, knowledgeable UK gardening expert. Give practical, specific, actionable advice. Tailor to UK climate and current season. Be direct and concise — no waffle.',
+      messages: chatHistory.map(m => ({role:m.role,content:m.content}))
+    });
+    chatHistory.push({role:'assistant',content:reply});
+    document.getElementById('ai-typing')?.remove();
+    msgs.innerHTML += `<div class="msg ai">${formatMarkdown(reply)}</div>`;
+  } catch(e) {
+    document.getElementById('ai-typing')?.remove();
+    msgs.innerHTML += `<div class="msg ai" style="color:var(--danger)">${e.message==='NO_KEY' ? 'No API key set — tap the ⚙ Settings tab to add your Anthropic key.' : 'Error — please try again.'}</div>`;
+  }
+  sendBtn.disabled = false;
+  msgs.scrollTop = msgs.scrollHeight;
+};
+
+// ── CALENDAR ──
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+let calMonth = new Date().getMonth();
+
+const CALENDAR_DATA = {
+  0:{tasks:[ // Jan
+    {t:'Mulch tender plants',d:'Apply a thick layer around vulnerable plants to protect from frost. Use bark or garden compost.',c:'amber'},
+    {t:'Plan your garden',d:'Order seeds and plan new borders or lawn improvements for spring.',c:'blue'},
+    {t:'Check overwintering plants',d:'Ventilate any plants in greenhouses on milder days.',c:'amber'},
+    {t:'Winter prune wisteria',d:'Cut back summer side-shoots to 2-3 buds from the main framework.',c:'green'},
+  ],tip:'January is mostly about protection and planning. Avoid walking on frozen or waterlogged lawns — it compresses the soil and causes long-term damage.'},
+  1:{tasks:[
+    {t:'Start seeds indoors',d:'Begin sowing tomatoes, peppers and aubergines on a sunny windowsill or heated propagator.',c:'green'},
+    {t:'Tidy borders',d:'Remove dead stems left for wildlife — it\'s now safe to cut back without disturbing hibernating insects.',c:'green'},
+    {t:'Feed garden birds',d:'Natural food sources are still scarce — keep feeders topped up.',c:'blue'},
+    {t:'Check lawn drainage',d:'Aerate any persistently waterlogged areas with a garden fork.',c:'amber'},
+  ],tip:'February can still bring hard frosts — don\'t be tempted to plant out too early. But if you have a cold frame, brassica seeds can go in now.'},
+  2:{tasks:[
+    {t:'Overseed bare lawn patches',d:'March is ideal for overseeding — soil is warming but moisture is good. Choose a mix suited to your conditions.',c:'green'},
+    {t:'Plant summer bulbs',d:'Dahlias and gladioli can go in from mid-March if frost risk is low.',c:'green'},
+    {t:'Prune roses',d:'Cut back to an outward-facing bud. Remove dead, damaged and crossing stems.',c:'amber'},
+    {t:'First lawn mow',d:'Cut on the highest setting — no more than a third off. Helps thicken the sward.',c:'green'},
+    {t:'Feed lawn',d:'Apply a spring/summer lawn fertiliser (high nitrogen) once growth starts.',c:'green'},
+  ],tip:'March is the busiest month to get ahead. A good lawn feed now, followed by watering if dry, will set up your grass for the whole season.'},
+  3:{tasks:[
+    {t:'Feed shrubs and borders',d:'Apply a balanced slow-release fertiliser around established shrubs. Good for lavender, hebes, and heathers.',c:'green'},
+    {t:'Harden off seedlings',d:'Move trays outside for a few hours daily to acclimatise before planting out.',c:'blue'},
+    {t:'Control weeds early',d:'Hoe weeds before they flower and seed. Tackle bindweed with repeated cutting or targeted weedkiller.',c:'amber'},
+    {t:'Plant heathers and hebes',d:'Ideal planting time — soil is warm enough and moisture is reliable.',c:'green'},
+    {t:'Lawn edging',d:'Re-define lawn edges with a half-moon cutter for a crisp, professional look.',c:'blue'},
+  ],tip:'April is prime planting time in the UK. Most new shrubs and perennials planted now will establish well before summer heat. Water in thoroughly.'},
+  4:{tasks:[
+    {t:'Plant out tender bedding',d:'After the last frost (usually mid-May in most of England), plant out dahlias, bedding plants and veg.',c:'green'},
+    {t:'Chelsea Chop',d:'Cut back summer perennials like sedums and rudbeckias by half to delay flowering and create bushier plants.',c:'blue'},
+    {t:'Water new plants regularly',d:'Newly planted shrubs need watering every 2-3 days in dry spells for their first season.',c:'amber'},
+    {t:'Apply lawn weedkiller',d:'If dandelions and daisies are a problem, treat with a selective lawn weedkiller in warm weather.',c:'amber'},
+  ],tip:'May is often dry in the south of England. New plantings are especially vulnerable — check the soil around them every 2-3 days.'},
+  5:{tasks:[
+    {t:'Mow lawns twice weekly',d:'In good growth periods, mow more frequently rather than cutting more off each time.',c:'green'},
+    {t:'Deadhead roses',d:'Remove spent flowers promptly to encourage repeat flowering throughout summer.',c:'green'},
+    {t:'Water deeply not often',d:'One deep watering per week is better than daily light watering — encourages deep roots.',c:'blue'},
+    {t:'Feed container plants',d:'Pots need weekly liquid feeding with a balanced or high-potash feed from now until September.',c:'amber'},
+  ],tip:'June can bring unexpected dry spells. Set up a water butt if you haven\'t already — lawns can be left to go brown, they will recover. Focus water on new plants and containers.'},
+  6:{tasks:[
+    {t:'Trim lavender after flowering',d:'Cut off spent flower spikes with a light trim — don\'t cut into old brown wood.',c:'green'},
+    {t:'Collect rainwater',d:'Use collected water on the garden and avoid using mains water on established lawns.',c:'blue'},
+    {t:'Watch for vine weevil',d:'Check containers — vine weevil larvae damage roots. Use biological control (nematodes) in warm soil.',c:'amber'},
+    {t:'Harvest regularly',d:'Pick fruit and veg frequently to encourage continued cropping.',c:'green'},
+  ],tip:'July is the peak month for pests. Check plants regularly for aphids, slugs, and caterpillars. A weekly walk around the garden catches problems early.'},
+  7:{tasks:[
+    {t:'Take semi-ripe cuttings',d:'August is ideal for propagating shrubs like lavender, hebe, heather, and sarcococca from cuttings.',c:'green'},
+    {t:'Plan autumn planting',d:'Order spring bulbs and autumn-planted shrubs now for best choice.',c:'blue'},
+    {t:'Continue feeding containers',d:'Keep feeding pots weekly until the end of September.',c:'amber'},
+    {t:'Late lawn feed',d:'Apply a summer lawn feed before the end of August — too late in autumn and you risk lush growth before frost.',c:'green'},
+  ],tip:'Late August is a great time to take cuttings from your lavender, hebes, and ornamental grasses. Pot them up and you\'ll have free plants for next year.'},
+  8:{tasks:[
+    {t:'Overseed the lawn',d:'September is the best month for lawn overseeding — soil is warm, rain is more reliable, and grass establishes before winter.',c:'green'},
+    {t:'Plant spring bulbs',d:'Plant daffodils, tulips, alliums and crocuses now for spring colour.',c:'green'},
+    {t:'Divide perennials',d:'Lift and divide overcrowded clumps of ornamental grasses, sedums and other perennials.',c:'green'},
+    {t:'Plant new shrubs',d:'Autumn planting gives shrubs time to establish roots before spring growth.',c:'green'},
+  ],tip:'September is arguably the best planting month of the year in the UK. Cool soil, reliable rain, and shrubs go dormant just as roots are getting established.'},
+  9:{tasks:[
+    {t:'Raise lawn mower height',d:'Cut on a higher setting for the last few mows of the year to protect roots from frost.',c:'amber'},
+    {t:'Rake up leaves',d:'Remove fallen leaves from the lawn — they block light and cause yellow patches.',c:'amber'},
+    {t:'Protect tender plants',d:'Move tender plants into a greenhouse or sheltered spot before the first frosts.',c:'amber'},
+    {t:'Plant garlic',d:'October is ideal for planting garlic cloves in well-drained soil.',c:'green'},
+  ],tip:'October is when the garden starts to wind down, but it\'s a great time to tidy up and give your borders a mulch to protect over winter.'},
+  10:{tasks:[
+    {t:'Apply autumn lawn feed',d:'Use a low-nitrogen, high-potassium autumn formula to harden up grass for winter.',c:'green'},
+    {t:'Mulch borders',d:'Apply a 5-7cm layer of compost or bark around plants to protect roots and suppress weeds.',c:'green'},
+    {t:'Plant tulip bulbs',d:'November is ideal for tulips — late planting reduces tulip fire disease risk.',c:'green'},
+    {t:'Prune fruit trees',d:'Once leaves have fallen, prune apples and pears to shape and remove dead wood.',c:'blue'},
+  ],tip:'Planting in November is still very effective for trees and shrubs. The ground is usually still workable and plants will establish roots all winter.'},
+  11:{tasks:[
+    {t:'Check winter plants',d:'Winter heaths and sarcococca should be looking their best — check for pests or waterlogging.',c:'blue'},
+    {t:'Order seeds for next year',d:'The best seed varieties sell out early — browse catalogues and order in December.',c:'blue'},
+    {t:'Protect pots from frost',d:'Wrap terracotta pots with bubble wrap or move them under cover to prevent cracking.',c:'amber'},
+    {t:'Avoid heavy foot traffic',d:'Stay off waterlogged or frozen lawns to prevent soil compaction.',c:'amber'},
+  ],tip:'December is a great time to assess your garden from indoors. Note what worked and what didn\'t — and plan for more winter interest with plants like sarcococca, winter heath, and hellebores.'},
+};
+
+window.changeMonth = (dir) => {
+  calMonth = (calMonth + dir + 12) % 12;
+  renderCalendar();
+};
+
+function renderCalendar() {
+  const data = CALENDAR_DATA[calMonth];
+  document.getElementById('month-title').textContent = MONTHS[calMonth];
+  const tasks = document.getElementById('calendar-tasks');
+  tasks.innerHTML = data.tasks.map(t => `
+    <div class="task-item">
+      <div class="task-dot ${t.c}"></div>
+      <div class="task-content">
+        <div class="task-title">${t.t}</div>
+        <div class="task-desc">${t.d}</div>
+      </div>
+    </div>`).join('');
+  document.getElementById('seasonal-tip').textContent = data.tip;
+
+  const bar = document.getElementById('urgency-bar');
+  const counts = {green:0,amber:0,blue:0};
+  data.tasks.forEach(t => counts[t.c]++);
+  bar.innerHTML = `
+    ${counts.green ? `<span class="badge badge-green">🌱 ${counts.green} to do</span>` : ''}
+    ${counts.amber ? `<span class="badge badge-amber">⚠ ${counts.amber} check</span>` : ''}
+    ${counts.blue ? `<span class="badge" style="background:rgba(106,171,207,0.18);color:#6aabcf">ℹ ${counts.blue} note</span>` : ''}`;
+}
+
+// ── JOURNAL ──
+window.openNewEntry = () => {
+  document.getElementById('entry-name').value = '';
+  document.getElementById('entry-notes').value = '';
+  document.getElementById('entry-photo-preview').style.display = 'none';
+  document.getElementById('modal-new').style.display = 'flex';
+};
+
+window.saveToJournal = async () => {
+  if (!pendingSaveResult) return;
+  const name = document.getElementById('save-name').value.trim() || 'Plant analysis';
+  const entry = {
+    name, notes: pendingSaveResult,
+    imageData: imageBase64 ? 'data:'+imageMime+';base64,'+imageBase64 : null,
+    date: new Date().toISOString(), type: 'analysis'
+  };
+  await persistEntry(entry);
+  document.getElementById('photo-result').innerHTML += '<p style="color:var(--green2);font-size:13px;margin-top:8px">✓ Saved to journal</p>';
+  pendingSaveResult = null;
+};
+
+window.saveEntry = async () => {
+  const name = document.getElementById('entry-name').value.trim() || 'Garden note';
+  const notes = document.getElementById('entry-notes').value.trim();
+  if (!notes) return;
+  const entry = { name, notes, imageData: null, date: new Date().toISOString(), type: 'note' };
+  await persistEntry(entry);
+  closeModal('modal-new');
+};
+
+async function persistEntry(entry) {
+  if (currentUser) {
+    const docRef = await addDoc(collection(db,'journal'), {...entry, uid: currentUser.uid});
+    journalEntries.unshift({...entry, id: docRef.id});
+  } else {
+    entry.id = Date.now().toString();
+    journalEntries.unshift(entry);
+    localStorage.setItem('gardenai_journal', JSON.stringify(journalEntries));
+  }
+  renderJournal();
+}
+
+async function loadJournal() {
+  if (currentUser) {
+    const q = query(collection(db,'journal'), where('uid','==',currentUser.uid), orderBy('date','desc'));
+    const snap = await getDocs(q);
+    journalEntries = snap.docs.map(d => ({...d.data(), id: d.id}));
+  } else {
+    try { journalEntries = JSON.parse(localStorage.getItem('gardenai_journal')) || []; } catch(e){ journalEntries=[]; }
+  }
+  renderJournal();
+}
+
+function renderJournal() {
+  const list = document.getElementById('journal-list');
+  const empty = document.getElementById('journal-empty');
+  if (!journalEntries.length) { list.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  list.innerHTML = journalEntries.map(e => `
+    <div class="journal-entry" onclick="showEntry('${e.id}')">
+      <div class="entry-header">
+        <div class="entry-title">${escHtml(e.name)}</div>
+        <div class="entry-date">${formatDate(e.date)}</div>
+      </div>
+      <div class="entry-preview">${escHtml(e.notes)}</div>
+      ${e.imageData ? `<img class="entry-img" src="${e.imageData}" alt="">` : ''}
+    </div>`).join('');
+}
+
+window.showEntry = (id) => {
+  const e = journalEntries.find(j => j.id===id);
+  if (!e) return;
+  document.getElementById('modal-detail-content').innerHTML = `
+    <div class="modal-title">${escHtml(e.name)}</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px">${formatDate(e.date)}</div>
+    ${e.imageData ? `<img class="entry-detail-img" src="${e.imageData}" alt="">` : ''}
+    <div class="entry-detail-content">${formatMarkdown(e.notes)}</div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="delete-btn" onclick="deleteEntry('${id}')">Delete</button>
+      <button class="ghost-btn" style="flex:1" onclick="closeModal('modal-detail')">Close</button>
+    </div>`;
+  document.getElementById('modal-detail').style.display = 'flex';
+};
+
+window.deleteEntry = async (id) => {
+  if (currentUser) {
+    try { await deleteDoc(doc(db,'journal',id)); } catch(e){}
+  }
+  journalEntries = journalEntries.filter(e => e.id!==id);
+  if (!currentUser) localStorage.setItem('gardenai_journal', JSON.stringify(journalEntries));
+  renderJournal();
+  closeModal('modal-detail');
+};
+
+// ── HELPERS ──
+async function callAnthropic(payload) {
+  const key = localStorage.getItem('gardenai_anthropic_key');
+  if (!key) throw new Error('NO_KEY');
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,...payload})
+  });
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.content?.find(b=>b.type==='text')?.text || '';
+}
+
+function formatMarkdown(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/^(\d+)\. /gm,'<br><strong>$1.</strong> ')
+    .replace(/^- /gm,'• ')
+    .replace(/\n/g,'<br>');
+}
+
+function escHtml(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function formatDate(iso){ const d=new Date(iso); return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }
+
+window.saveApiKey = () => {
+  const key = document.getElementById('settings-key').value.trim();
+  const msg = document.getElementById('settings-msg');
+  if (!key) { msg.style.color='var(--danger)'; msg.textContent='Please enter a key.'; return; }
+  if (!key.startsWith('sk-ant-')) { msg.style.color='var(--danger)'; msg.textContent='That doesn\'t look like a valid Anthropic key.'; return; }
+  localStorage.setItem('gardenai_anthropic_key', key);
+  msg.style.color='var(--green2)';
+  msg.textContent='✓ Key saved — you\'re good to go!';
+};
+window.toggleKeyVisibility = () => {
+  const input = document.getElementById('settings-key');
+  input.type = input.type === 'password' ? 'text' : 'password';
+};
+
+window.closeModal = (id) => document.getElementById(id).style.display='none';
+window.closeModalOnOverlay = (e,id) => { if(e.target===document.getElementById(id)) closeModal(id); };
+
+// Init
+document.addEventListener('DOMContentLoaded',()=>{
+  calMonth = new Date().getMonth();
+  try { journalEntries = JSON.parse(localStorage.getItem('gardenai_journal')) || []; } catch(e){}
+  const savedKey = localStorage.getItem('gardenai_anthropic_key');
+  if (savedKey) document.getElementById('settings-key').value = savedKey;
+});
+</script>
+</body>
+</html>
