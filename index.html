@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a2e1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GardenAI">
+<title>GardenAI</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1a0f;--bg2:#162016;--bg3:#1e2e1e;--bg4:#253025;--card:#1a271a;
+  --border:rgba(120,180,90,0.15);--border2:rgba(120,180,90,0.28);
+  --green:#7eb85a;--green2:#a3d47a;--green3:#c8eaa4;
+  --amber:#d4a843;--amber2:#f0c96a;--blue:#6aabcf;
+  --text:#e8f0e0;--text2:#a8bc98;--text3:#6a8060;--danger:#e07070;
+  --radius:14px;--radius2:20px;
+  --font-serif:'Lora',Georgia,serif;--font-sans:'DM Sans',sans-serif;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--font-sans);}
+.shell{display:flex;flex-direction:column;height:100%;padding-top:var(--safe-top);}
+.topbar{padding:14px 20px 10px;background:var(--bg);border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-family:var(--font-serif);font-size:20px;color:var(--green2);letter-spacing:-0.3px;}
+.topbar-sub{font-size:11px;color:var(--text3);margin-top:1px;}
+.user-btn{width:34px;height:34px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;font-weight:500;color:var(--green2);}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(70px + var(--safe-bottom));}
+.nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:0.5px solid var(--border);display:flex;padding-bottom:var(--safe-bottom);z-index:100;}
+.nav-btn{flex:1;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;border:none;background:none;}
+.nav-icon{font-size:18px;line-height:1;}
+.nav-label{font-size:9px;color:var(--text3);letter-spacing:0.3px;}
+.nav-btn.active .nav-label{color:var(--green2);}
+.panel{display:none;padding:16px;}
+.panel.active{display:block;}
+
+/* AUTH */
+.auth-screen{position:fixed;inset:0;background:var(--bg);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:center;overflow-y:auto;}
+.auth-logo{font-family:var(--font-serif);font-size:40px;color:var(--green2);margin-bottom:6px;}
+.auth-tagline{font-size:14px;color:var(--text2);margin-bottom:24px;line-height:1.5;}
+.google-btn{display:flex;align-items:center;gap:10px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);padding:13px 24px;font-size:14px;color:var(--text);cursor:pointer;font-family:var(--font-sans);font-weight:500;width:100%;max-width:280px;justify-content:center;}
+.auth-skip{margin-top:14px;font-size:13px;color:var(--text3);cursor:pointer;text-decoration:underline;}
+.auth-input{width:100%;max-width:280px;background:rgba(30,46,30,0.9);border:0.5px solid rgba(120,180,90,0.3);border-radius:12px;padding:12px 14px;font-size:14px;color:#e8f0e0;font-family:'DM Sans',sans-serif;margin-bottom:10px;display:block;}
+.auth-btn{width:100%;max-width:280px;padding:13px;background:#7eb85a;border:none;border-radius:12px;font-size:15px;font-weight:500;color:#0f1a0f;cursor:pointer;font-family:'DM Sans',sans-serif;margin-bottom:10px;}
+
+/* CARDS & BADGES */
+.card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius2);padding:16px;margin-bottom:12px;}
+.card-title{font-family:var(--font-serif);font-size:16px;color:var(--green3);margin-bottom:4px;}
+.card-sub{font-size:12px;color:var(--text3);}
+.section-label{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;font-weight:500;}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;}
+.badge-green{background:rgba(126,184,90,0.18);color:var(--green2);}
+.badge-amber{background:rgba(212,168,67,0.18);color:var(--amber2);}
+.badge-red{background:rgba(224,112,112,0.18);color:var(--danger);}
+.badge-blue{background:rgba(106,171,207,0.18);color:var(--blue);}
+
+/* INPUTS */
+input,select,textarea{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:13px;color:var(--text);font-family:var(--font-sans);-webkit-appearance:none;appearance:none;}
+select option{background:var(--bg3);}
+input::placeholder,textarea::placeholder{color:var(--text3);}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--border2);}
+.row{display:flex;gap:8px;margin:10px 0;}
+.row select,.row input{flex:1;}
+.primary-btn{width:100%;padding:13px;background:var(--green);border:none;border-radius:var(--radius);font-size:15px;font-weight:500;color:#0f1a0f;cursor:pointer;font-family:var(--font-sans);transition:opacity 0.15s;margin-top:4px;}
+.primary-btn:disabled{opacity:0.35;cursor:not-allowed;}
+.ghost-btn{padding:9px 16px;background:transparent;border:0.5px solid var(--border2);border-radius:var(--radius);font-size:13px;color:var(--text2);cursor:pointer;font-family:var(--font-sans);white-space:nowrap;}
+.ghost-btn:active{background:var(--bg3);}
+.delete-btn{padding:9px 16px;background:transparent;border:0.5px solid rgba(224,112,112,0.4);border-radius:var(--radius);font-size:13px;color:var(--danger);cursor:pointer;font-family:var(--font-sans);}
+
+/* PHOTO */
+.upload-zone{border:1.5px dashed var(--border2);border-radius:var(--radius2);padding:28px 16px;text-align:center;cursor:pointer;background:var(--bg2);}
+.upload-zone p{font-size:13px;color:var(--text3);margin-top:6px;}
+.upload-zone strong{color:var(--text2);}
+.upload-icon{font-size:36px;}
+.preview-wrap{position:relative;margin:12px 0;}
+.preview-wrap img{width:100%;border-radius:var(--radius);border:0.5px solid var(--border);max-height:240px;object-fit:cover;display:block;}
+.remove-btn{position:absolute;top:8px;right:8px;background:rgba(15,26,15,0.85);border:0.5px solid var(--border2);border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:13px;color:var(--text2);display:flex;align-items:center;justify-content:center;}
+.result-box{background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;margin-top:12px;font-size:14px;line-height:1.75;color:var(--text2);}
+.result-box h4{font-family:var(--font-serif);color:var(--green2);margin-bottom:8px;font-size:15px;}
+.save-row{display:flex;gap:8px;margin-top:10px;}
+.save-row input{flex:1;}
+
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 210px);min-height:280px;}
+.chat-msgs{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px;padding:4px 0 12px;}
+.msg{max-width:86%;padding:10px 14px;font-size:14px;line-height:1.65;}
+.msg.user{align-self:flex-end;background:var(--bg4);border:0.5px solid var(--border2);border-radius:18px 18px 4px 18px;color:var(--text);}
+.msg.ai{align-self:flex-start;background:var(--bg3);border:0.5px solid var(--border);border-radius:18px 18px 18px 4px;color:var(--text2);}
+.msg.ai.typing{color:var(--text3);font-style:italic;}
+.quick-pills{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;scrollbar-width:none;}
+.quick-pills::-webkit-scrollbar{display:none;}
+.pill{white-space:nowrap;font-size:12px;padding:6px 12px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:20px;color:var(--text2);cursor:pointer;flex-shrink:0;}
+.chat-input-row{display:flex;gap:8px;padding-top:10px;border-top:0.5px solid var(--border);}
+.chat-input-row input{flex:1;padding:10px 14px;font-size:14px;}
+.send-btn{padding:10px 16px;background:var(--green);border:none;border-radius:var(--radius);font-size:14px;font-weight:500;color:#0f1a0f;cursor:pointer;}
+.send-btn:disabled{opacity:0.4;}
+
+/* CALENDAR */
+.month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.month-title{font-family:var(--font-serif);font-size:20px;color:var(--green2);}
+.month-arrow{background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:7px 14px;font-size:16px;color:var(--text2);cursor:pointer;}
+.task-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--border);}
+.task-item:last-child{border-bottom:none;}
+.task-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.task-dot.green{background:var(--green);}
+.task-dot.amber{background:var(--amber);}
+.task-dot.blue{background:var(--blue);}
+.task-title{font-size:14px;color:var(--text);font-weight:500;margin-bottom:2px;}
+.task-desc{font-size:12px;color:var(--text3);line-height:1.5;}
+.urgency-bar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+
+/* WEATHER */
+.weather-card{background:linear-gradient(135deg,#162016,#1e3020);border:0.5px solid var(--border2);border-radius:var(--radius2);padding:16px;margin-bottom:12px;}
+.weather-main{display:flex;align-items:center;justify-content:space-between;}
+.weather-temp{font-family:var(--font-serif);font-size:36px;color:var(--green2);}
+.weather-icon{font-size:40px;}
+.weather-desc{font-size:13px;color:var(--text2);margin-top:4px;text-transform:capitalize;}
+.weather-advice{background:rgba(126,184,90,0.1);border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 12px;margin-top:10px;font-size:13px;color:var(--green3);line-height:1.5;}
+.weather-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px;}
+.weather-stat{background:rgba(0,0,0,0.2);border-radius:10px;padding:8px;text-align:center;}
+.weather-stat-val{font-size:15px;font-weight:500;color:var(--text);}
+.weather-stat-lbl{font-size:10px;color:var(--text3);margin-top:2px;}
+
+/* HOME */
+.home-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.home-tile{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius2);padding:14px;cursor:pointer;text-align:center;}
+.home-tile-icon{font-size:26px;margin-bottom:6px;}
+.home-tile-label{font-size:13px;color:var(--text2);font-weight:500;}
+.home-tile-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+
+/* PLANT DB */
+.plant-search{width:100%;margin-bottom:12px;}
+.plant-card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius2);padding:14px;margin-bottom:10px;cursor:pointer;}
+.plant-card-header{display:flex;align-items:center;gap:12px;}
+.plant-emoji{font-size:26px;width:44px;height:44px;background:var(--bg3);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.plant-name{font-family:var(--font-serif);font-size:15px;color:var(--green3);}
+.plant-latin{font-size:11px;color:var(--text3);margin-top:2px;font-style:italic;}
+.plant-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px;}
+.plant-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.plant-detail-item{background:var(--bg3);border-radius:10px;padding:8px 10px;}
+.plant-detail-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;}
+.plant-detail-val{font-size:13px;color:var(--text);margin-top:2px;}
+
+/* PESTS */
+.pest-card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius2);padding:14px;margin-bottom:10px;cursor:pointer;}
+.pest-header{display:flex;align-items:center;gap:10px;}
+.pest-emoji{font-size:24px;}
+.pest-name{font-family:var(--font-serif);font-size:15px;color:var(--green3);}
+.pest-detail{font-size:13px;color:var(--text2);line-height:1.7;margin-top:10px;display:none;}
+.pest-detail.open{display:block;}
+.pest-section-title{font-size:10px;text-transform:uppercase;letter-spacing:0.5px;color:var(--text3);margin-bottom:3px;margin-top:8px;}
+
+/* WATERING */
+.water-plant{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius2);padding:14px;margin-bottom:10px;}
+.water-plant-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.water-plant-name{font-family:var(--font-serif);font-size:15px;color:var(--green3);}
+.water-last{font-size:11px;color:var(--text3);margin-top:3px;}
+.water-status{font-size:11px;padding:4px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+.water-ok{background:rgba(126,184,90,0.18);color:var(--green2);}
+.water-soon{background:rgba(212,168,67,0.18);color:var(--amber2);}
+.water-due{background:rgba(224,112,112,0.18);color:var(--danger);}
+.water-btn{padding:7px 14px;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);font-size:12px;color:var(--text2);cursor:pointer;font-family:var(--font-sans);}
+
+/* JOURNAL */
+.journal-entry{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius2);padding:14px;margin-bottom:10px;cursor:pointer;}
+.entry-header{display:flex;justify-content:space-between;align-items:flex-start;}
+.entry-title{font-family:var(--font-serif);font-size:15px;color:var(--green3);}
+.entry-date{font-size:11px;color:var(--text3);}
+.entry-preview{font-size:13px;color:var(--text3);margin-top:6px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.entry-img{width:100%;height:100px;object-fit:cover;border-radius:10px;margin-top:8px;}
+.fab{position:fixed;bottom:calc(80px + var(--safe-bottom));right:20px;width:52px;height:52px;border-radius:50%;background:var(--green);border:none;font-size:24px;color:#0f1a0f;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(126,184,90,0.35);z-index:50;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:300;display:flex;align-items:flex-end;}
+.modal{background:var(--bg2);border-radius:var(--radius2) var(--radius2) 0 0;border-top:0.5px solid var(--border2);padding:20px 20px calc(20px + var(--safe-bottom));width:100%;max-height:88vh;overflow-y:auto;}
+.modal-title{font-family:var(--font-serif);font-size:18px;color:var(--green2);margin-bottom:16px;}
+.modal textarea{width:100%;min-height:100px;resize:none;margin-bottom:10px;}
+.modal input[type=text]{width:100%;margin-bottom:10px;}
+.modal-actions{display:flex;gap:8px;margin-top:6px;}
+.modal-actions .primary-btn{margin-top:0;}
+.entry-detail-content{font-size:14px;color:var(--text2);line-height:1.75;margin-top:10px;white-space:pre-wrap;}
+.entry-detail-img{width:100%;border-radius:var(--radius);margin:10px 0;}
+
+/* MISC */
+.loading-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(126,184,90,0.3);border-top-color:var(--green);border-radius:50%;animation:spin 0.7s linear infinite;margin-right:6px;vertical-align:middle;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:48px 24px;color:var(--text3);}
+.empty-state .es-icon{font-size:40px;margin-bottom:12px;}
+.empty-state p{font-size:14px;line-height:1.6;}
+.planner-label{font-size:12px;color:var(--text3);margin-bottom:5px;display:block;}
+.planner-form{background:var(--card);border:0.5px solid var(--border);border-radius:var(--radius2);padding:16px;margin-bottom:12px;}
+.planner-form select,.planner-form input{width:100%;margin-bottom:10px;}
+/* LAWN CARE */
+.lawn-section{margin-bottom:16px;}
+.lawn-section-title{font-family:var(--font-serif);font-size:16px;color:var(--green3);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.lawn-month-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:4px;}
+.lawn-month-chip{background:var(--bg3);border:0.5px solid var(--border);border-radius:10px;padding:8px 6px;text-align:center;cursor:pointer;}
+.lawn-month-chip.active{background:rgba(126,184,90,0.18);border-color:var(--green);}
+.lawn-month-chip-name{font-size:11px;color:var(--text3);margin-bottom:2px;}
+.lawn-month-chip-tasks{font-size:10px;color:var(--green2);font-weight:500;}
+.lawn-task-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border);}
+.lawn-task-row:last-child{border-bottom:none;}
+.lawn-task-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.lawn-task-name{font-size:14px;color:var(--text);font-weight:500;margin-bottom:2px;}
+.lawn-task-desc{font-size:12px;color:var(--text3);line-height:1.55;}
+.lawn-tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:500;margin-top:4px;margin-right:3px;}
+.lawn-tag-feed{background:rgba(126,184,90,0.18);color:var(--green2);}
+.lawn-tag-iron{background:rgba(106,171,207,0.18);color:var(--blue);}
+.lawn-tag-weed{background:rgba(212,168,67,0.18);color:var(--amber2);}
+.lawn-tag-aerate{background:rgba(200,234,164,0.18);color:var(--green3);}
+.lawn-tag-mow{background:rgba(126,184,90,0.12);color:var(--text2);}
+.lawn-tag-seed{background:rgba(163,212,122,0.2);color:var(--green2);}
+.lawn-tag-repair{background:rgba(224,112,112,0.15);color:var(--danger);}
+.lawn-tip-box{background:rgba(126,184,90,0.07);border:0.5px solid var(--border2);border-radius:var(--radius);padding:12px 14px;font-size:13px;color:var(--green3);line-height:1.6;margin-top:8px;}
+
+
+/* NOTIFICATION BANNERS */
+#notif-container{position:fixed;top:calc(60px + var(--safe-top));left:12px;right:12px;z-index:500;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.notif-banner{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius2);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;pointer-events:all;box-shadow:0 4px 24px rgba(0,0,0,0.5);transform:translateY(-8px);opacity:0;animation:notifIn 0.35s ease forwards;}
+.notif-banner.water{border-color:rgba(106,171,207,0.5);}
+.notif-banner.seasonal{border-color:rgba(126,184,90,0.5);}
+.notif-icon{font-size:22px;flex-shrink:0;margin-top:1px;}
+.notif-body{flex:1;}
+.notif-title{font-family:var(--font-serif);font-size:14px;color:var(--green3);margin-bottom:3px;}
+.notif-msg{font-size:13px;color:var(--text2);line-height:1.5;}
+.notif-actions{display:flex;gap:6px;margin-top:8px;}
+.notif-action{padding:5px 12px;border-radius:20px;font-size:12px;cursor:pointer;font-family:var(--font-sans);border:none;}
+.notif-action.primary{background:var(--green);color:#0f1a0f;font-weight:500;}
+.notif-action.ghost{background:transparent;border:0.5px solid var(--border2);color:var(--text2);}
+.notif-close{background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:0 0 0 4px;line-height:1;flex-shrink:0;}
+@keyframes notifIn{to{transform:translateY(0);opacity:1;}}
+@keyframes notifOut{from{transform:translateY(0);opacity:1;}to{transform:translateY(-8px);opacity:0;}}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div class="auth-screen" id="auth-screen">
+  <span style="font-size:52px;margin-bottom:16px">🌿</span>
+  <div class="auth-logo">GardenAI</div>
+  <p class="auth-tagline">Your intelligent UK garden companion.<br>Identify, diagnose, and care for your plants.</p>
+  <div style="display:flex;gap:0;margin-bottom:20px;border:0.5px solid rgba(120,180,90,0.3);border-radius:12px;overflow:hidden;width:100%;max-width:280px;">
+    <button id="tab-signin" onclick="showAuthTab('signin')" style="flex:1;padding:9px;background:rgba(126,184,90,0.2);border:none;color:#a3d47a;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">Sign in</button>
+    <button id="tab-register" onclick="showAuthTab('register')" style="flex:1;padding:9px;background:transparent;border:none;color:#6a8060;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;">Register</button>
+  </div>
+  <div id="form-signin" style="width:100%;max-width:280px;">
+    <input id="signin-email" type="email" placeholder="Email address" class="auth-input">
+    <input id="signin-password" type="password" placeholder="Password" class="auth-input">
+    <button onclick="signInEmail()" class="auth-btn">Sign in</button>
+    <p onclick="forgotPassword()" style="font-size:13px;color:#6a8060;cursor:pointer;text-decoration:underline;text-align:center;margin-bottom:16px;">Forgot password?</p>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;width:100%;max-width:280px;">
+      <div style="flex:1;height:0.5px;background:rgba(120,180,90,0.2)"></div>
+      <span style="font-size:12px;color:#6a8060">or</span>
+      <div style="flex:1;height:0.5px;background:rgba(120,180,90,0.2)"></div>
+    </div>
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/><path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
+      Sign in with Google
+    </button>
+  </div>
+  <div id="form-register" style="width:100%;max-width:280px;display:none;">
+    <input id="reg-name" type="text" placeholder="Your name" class="auth-input">
+    <input id="reg-email" type="email" placeholder="Email address" class="auth-input">
+    <input id="reg-password" type="password" placeholder="Password (min 6 characters)" class="auth-input">
+    <button onclick="registerEmail()" class="auth-btn">Create account</button>
+  </div>
+  <div id="auth-error" style="font-size:13px;color:#e07070;margin-top:12px;text-align:center;max-width:280px;min-height:18px;"></div>
+  <p class="auth-skip" onclick="skipAuth()">Continue without signing in</p>
+</div>
+
+<!-- MAIN APP -->
+<div class="shell" id="app" style="display:none">
+
+  <!-- NOTIFICATION BANNERS -->
+  <div id="notif-container"></div>
+
+  <div class="topbar">
+    <div><div class="topbar-title">🌿 GardenAI</div><div class="topbar-sub" id="topbar-sub">Your garden companion</div></div>
+    <div class="user-btn" onclick="showUserMenu()" id="user-btn">👤</div>
+  </div>
+
+  <div class="content">
+
+    <!-- HOME -->
+    <div class="panel active" id="panel-home">
+      <div id="weather-widget"></div>
+      <div class="section-label">Quick access</div>
+      <div class="home-grid">
+        <div class="home-tile" onclick="navTo('analyse')"><div class="home-tile-icon">📷</div><div class="home-tile-label">Analyse plant</div><div class="home-tile-sub">Photo diagnosis</div></div>
+        <div class="home-tile" onclick="navTo('chat')"><div class="home-tile-icon">💬</div><div class="home-tile-label">Ask expert</div><div class="home-tile-sub">Garden Q&A</div></div>
+        <div class="home-tile" onclick="navTo('plants')"><div class="home-tile-icon">🌿</div><div class="home-tile-label">Plant guide</div><div class="home-tile-sub">Care database</div></div>
+        <div class="home-tile" onclick="navTo('pests')"><div class="home-tile-icon">🐛</div><div class="home-tile-label">Pest & disease</div><div class="home-tile-sub">Identify & treat</div></div>
+        <div class="home-tile" onclick="navTo('watering')"><div class="home-tile-icon">💧</div><div class="home-tile-label">Watering</div><div class="home-tile-sub">Track & remind</div></div>
+        <div class="home-tile" onclick="navTo('planner')"><div class="home-tile-icon">🗺️</div><div class="home-tile-label">Planner</div><div class="home-tile-sub">AI suggestions</div></div>
+        <div class="home-tile" onclick="navTo('lawn')"><div class="home-tile-icon">🌱</div><div class="home-tile-label">Lawn care</div><div class="home-tile-sub">Full programme</div></div>
+      </div>
+      <div class="section-label">This month</div>
+      <div class="card" id="home-month-tasks"></div>
+    </div>
+
+    <!-- ANALYSE -->
+    <div class="panel" id="panel-analyse">
+      <div class="section-label">Photo Analysis</div>
+      <div class="upload-zone" onclick="document.getElementById('file-input').click()" id="upload-zone">
+        <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleFile(event)" style="display:none;border:none;padding:0;background:none;">
+        <div class="upload-icon">📷</div>
+        <p><strong>Take a photo or upload</strong></p>
+        <p>Point at any plant, lawn, or leaves</p>
+      </div>
+      <div class="preview-wrap" id="preview-wrap" style="display:none">
+        <img id="preview-img" src="" alt="">
+        <button class="remove-btn" onclick="removeImage()">✕</button>
+      </div>
+      <div class="row">
+        <select id="plant-type"><option value="">Plant type</option><option>Lawn / grass</option><option>Lavender</option><option>Heathers / heath</option><option>Ornamental grass</option><option>Pieris</option><option>Sarcococca</option><option>Hebe</option><option>Shrub / hedge</option><option>Vegetable / fruit</option><option>Houseplant</option><option>Tree</option><option>Rose</option><option>Weed identification</option><option>Other</option></select>
+        <select id="concern"><option value="">Concern</option><option>General health check</option><option>Yellowing leaves</option><option>Brown patches</option><option>Pests / insects</option><option>Disease / fungus</option><option>Not flowering</option><option>Wilting / drooping</option><option>Watering advice</option><option>Feeding advice</option><option>Identify this plant</option></select>
+      </div>
+      <button class="primary-btn" id="analyse-btn" onclick="analysePhoto()" disabled>Analyse Photo</button>
+      <div id="photo-result"></div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="panel" id="panel-chat">
+      <div class="section-label">Garden Q&amp;A</div>
+      <div class="quick-pills">
+        <div class="pill" onclick="sendQuick('Why are my lawn edges turning yellow?')">Yellow lawn?</div>
+        <div class="pill" onclick="sendQuick('When should I feed lavender in the UK?')">Feed lavender?</div>
+        <div class="pill" onclick="sendQuick('How do I get rid of bindweed permanently?')">Bindweed</div>
+        <div class="pill" onclick="sendQuick('Best time to overseed a UK lawn?')">Overseeding?</div>
+        <div class="pill" onclick="sendQuick('How do I care for Pieris Forest Flame?')">Pieris care?</div>
+        <div class="pill" onclick="sendQuick('Is Sarcococca good for shade?')">Sarcococca?</div>
+        <div class="pill" onclick="sendQuick('What should I do in my garden this month?')">This month?</div>
+        <div class="pill" onclick="sendQuick('How do I improve clay soil?')">Clay soil?</div>
+        <div class="pill" onclick="sendQuick('Best plants to attract pollinators?')">Pollinators?</div>
+        <div class="pill" onclick="sendQuick('How do I get rid of moss in my lawn?')">Lawn moss?</div>
+      </div>
+      <div class="chat-wrap">
+        <div class="chat-msgs" id="chat-msgs">
+          <div class="msg ai">Hi! I'm your UK garden expert 🌿 Ask me anything about plants, lawn, pests, feeding — whatever's on your mind.</div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chat-input" placeholder="Ask about your garden..." onkeydown="if(event.key==='Enter')sendChat()">
+          <button class="send-btn" id="send-btn" onclick="sendChat()">→</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div class="panel" id="panel-calendar">
+      <div class="month-nav">
+        <button class="month-arrow" onclick="changeMonth(-1)">‹</button>
+        <div class="month-title" id="month-title"></div>
+        <button class="month-arrow" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="urgency-bar" id="urgency-bar"></div>
+      <div class="card"><div class="section-label" style="margin-bottom:12px">Tasks this month</div><div id="calendar-tasks"></div></div>
+      <div class="card"><div class="card-title">Seasonal tip</div><div style="font-size:14px;color:var(--text2);line-height:1.7;margin-top:8px" id="seasonal-tip"></div></div>
+    </div>
+
+    <!-- PLANT DATABASE -->
+    <div class="panel" id="panel-plants">
+      <div class="section-label">Plant care guide</div>
+      <input type="text" class="plant-search" id="plant-search" placeholder="Search plants…" oninput="filterPlants()" style="width:100%">
+      <div id="plant-list"></div>
+    </div>
+
+    <!-- PEST GUIDE -->
+    <div class="panel" id="panel-pests">
+      <div class="section-label">Pest &amp; disease guide</div>
+      <div class="quick-pills" style="margin-bottom:12px">
+        <div class="pill" onclick="filterPests('all')">All</div>
+        <div class="pill" onclick="filterPests('pest')">Pests</div>
+        <div class="pill" onclick="filterPests('disease')">Disease</div>
+        <div class="pill" onclick="filterPests('lawn')">Lawn</div>
+      </div>
+      <div id="pest-list"></div>
+      <div class="card" style="margin-top:4px">
+        <div class="card-title" style="margin-bottom:6px">Not sure what it is?</div>
+        <div style="font-size:13px;color:var(--text3);margin-bottom:10px">Upload a photo for an AI diagnosis</div>
+        <button class="primary-btn" style="margin-top:0" onclick="navTo('analyse')">Open photo analysis →</button>
+      </div>
+    </div>
+
+    <!-- WATERING -->
+    <div class="panel" id="panel-watering">
+      <div class="section-label">Watering tracker</div>
+      <div id="water-list"></div>
+      <div class="empty-state" id="water-empty" style="display:none"><div class="es-icon">💧</div><p>No plants added yet.<br>Tap + to track your first plant.</p></div>
+    </div>
+
+
+    <!-- LAWN CARE -->
+    <div class="panel" id="panel-lawn">
+      <div class="section-label">Lawn care programme</div>
+      <div class="card" style="margin-bottom:10px">
+        <div style="font-size:13px;color:var(--text2);line-height:1.6">A complete month-by-month lawn care guide covering feeding, iron sulphate, aeration, weed control, overseeding and more. Tap any month to see what to do.</div>
+      </div>
+      <div class="lawn-month-grid" id="lawn-month-grid"></div>
+      <div class="card" id="lawn-month-detail" style="margin-top:10px"></div>
+      <div class="card" style="margin-top:4px">
+        <div class="lawn-section-title">🧪 Product guide</div>
+        <div class="lawn-task-row">
+          <div class="lawn-task-icon">🌿</div>
+          <div><div class="lawn-task-name">Spring/Summer Feed (High Nitrogen)</div><div class="lawn-task-desc">Apply March–August. Promotes lush green growth. Look for NPK ratios like 12-4-8 or similar. Brands: Miracle-Gro Lawn Food, Evergreen Complete, Westland Lawn Feed.</div><span class="lawn-tag lawn-tag-feed">Feed</span></div>
+        </div>
+        <div class="lawn-task-row">
+          <div class="lawn-task-icon">🍂</div>
+          <div><div class="lawn-task-name">Autumn/Winter Feed (High Potassium)</div><div class="lawn-task-desc">Apply September–November. Hardens grass for winter, builds root strength. Low nitrogen to avoid soft growth before frosts. Brands: Evergreen Autumn, Westland Autumn Lawn Food.</div><span class="lawn-tag lawn-tag-feed">Feed</span></div>
+        </div>
+        <div class="lawn-task-row">
+          <div class="lawn-task-icon">⚗️</div>
+          <div><div class="lawn-task-name">Iron Sulphate (Ferrous Sulphate)</div><div class="lawn-task-desc">Apply spring and autumn. Kills moss, hardens grass, deepens green colour without promoting excessive growth. Mix 35g per litre of water per sq metre. Blackens and kills moss within 2 weeks — rake out dead moss after. Brands: Maxicrop Moss Killer, Sulphate of Iron.</div><span class="lawn-tag lawn-tag-iron">Iron</span></div>
+        </div>
+        <div class="lawn-task-row">
+          <div class="lawn-task-icon">🌱</div>
+          <div><div class="lawn-task-name">Lawn Weedkiller (Selective)</div><div class="lawn-task-desc">Apply May–September in warm, settled weather when grass is actively growing. Targets broadleaf weeds (dandelions, daisies, clover, plantain) without harming grass. Do not mow 3 days before or after. Brands: Resolva Lawn Weedkiller, Verdone Extra, Weedol Lawn.</div><span class="lawn-tag lawn-tag-weed">Weed</span></div>
+        </div>
+        <div class="lawn-task-row">
+          <div class="lawn-task-icon">🌾</div>
+          <div><div class="lawn-task-name">Overseeding Mix</div><div class="lawn-task-desc">Use ryegrass-based mix for wear areas, fine fescue mix for ornamental lawns. Best applied March or September. Scratch surface first, sow at 35g per sq metre, keep moist for 3 weeks. Brands: Johnsons Lawn Seed, Miracle-Gro Patch Magic.</div><span class="lawn-tag lawn-tag-seed">Seed</span></div>
+        </div>
+        <div class="lawn-task-row">
+          <div class="lawn-task-icon">🦠</div>
+          <div><div class="lawn-task-name">Nematodes (Biological Pest Control)</div><div class="lawn-task-desc">For leatherjackets: use Steinernema feltiae, apply August–October when soil is above 10°C and moist. For chafer grubs: use Heterorhabditis bacteriophora, apply June–July. Water in well and keep moist. Order fresh — short shelf life. Brands: Nemasys, Nemaslug.</div><span class="lawn-tag lawn-tag-repair">Pest</span></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:4px">
+        <div class="lawn-section-title">📐 Mowing guide</div>
+        <div class="lawn-task-row">
+          <div class="lawn-task-icon">✂️</div>
+          <div><div class="lawn-task-name">The one-third rule</div><div class="lawn-task-desc">Never remove more than one third of the grass blade in a single mow. Cutting too short stresses the lawn and opens it up to weeds and moss.</div></div>
+        </div>
+        <div class="lawn-task-row">
+          <div class="lawn-task-icon">📏</div>
+          <div><div class="lawn-task-name">Cutting heights by season</div><div class="lawn-task-desc">Spring/Autumn: 30–40mm. Summer (dry spells): raise to 50mm to reduce stress. Winter: 40–50mm. Ornamental/striped lawn: 15–25mm but never in drought.</div></div>
+        </div>
+        <div class="lawn-task-row">
+          <div class="lawn-task-icon">🚫</div>
+          <div><div class="lawn-task-name">When NOT to mow</div><div class="lawn-task-desc">Avoid mowing frozen grass, waterlogged lawn, or during drought stress. Also avoid mowing within 3 days of applying weedkiller or fertiliser.</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PLANNER -->
+    <div class="panel" id="panel-planner">
+      <div class="section-label">AI Planting Planner</div>
+      <div class="planner-form">
+        <label class="planner-label">Space type</label>
+        <select id="plan-space"><option value="">Select space type</option><option>Front garden border</option><option>Back garden border</option><option>Lawn area</option><option>Raised bed / veg patch</option><option>Container / pot</option><option>Shaded area</option><option>Sunny south-facing bed</option><option>North-facing wall</option><option>Rockery / gravel garden</option><option>Wildflower area</option></select>
+        <label class="planner-label">Sun exposure</label>
+        <select id="plan-sun"><option value="">Select sun level</option><option>Full sun (6+ hours)</option><option>Partial shade (3-6 hours)</option><option>Full shade (under 3 hours)</option></select>
+        <label class="planner-label">Soil type</label>
+        <select id="plan-soil"><option value="">Select soil type</option><option>Well-drained / sandy</option><option>Clay / heavy</option><option>Loamy / average</option><option>Chalky / alkaline</option><option>Acidic / peaty</option></select>
+        <label class="planner-label">Main goal</label>
+        <select id="plan-goal"><option value="">Select goal</option><option>Year-round colour and interest</option><option>Low maintenance</option><option>Wildlife and pollinators</option><option>Scent and fragrance</option><option>Winter interest</option><option>Privacy / screening</option><option>Grow food / veg</option><option>Ground cover / suppress weeds</option></select>
+        <label class="planner-label">Anything else to consider? (optional)</label>
+        <input type="text" id="plan-notes" placeholder="e.g. dogs, children, deer, small space…" style="width:100%">
+        <button class="primary-btn" style="margin-top:6px" onclick="runPlanner()">Get planting suggestions</button>
+      </div>
+      <div id="planner-result"></div>
+    </div>
+
+    <!-- JOURNAL -->
+    <div class="panel" id="panel-journal">
+      <div class="section-label">Plant Journal</div>
+      <div id="journal-list"></div>
+      <div class="empty-state" id="journal-empty" style="display:none"><div class="es-icon">📔</div><p>No entries yet.<br>Save photo analyses or tap + to add notes.</p></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="panel" id="panel-settings">
+      <div class="section-label">Settings</div>
+      <div class="card">
+        <div class="card-title">Anthropic API Key</div>
+        <div class="card-sub" style="margin-bottom:12px">Stored only on this device — never shared except with the Anthropic API.</div>
+        <input type="password" id="settings-key" placeholder="sk-ant-api03-…" style="width:100%;margin-bottom:10px">
+        <div style="display:flex;gap:8px">
+          <button class="ghost-btn" onclick="toggleKeyVisibility()">Show</button>
+          <button class="primary-btn" style="flex:1;margin-top:0" onclick="saveApiKey()">Save key</button>
+        </div>
+        <div id="settings-msg" style="font-size:13px;margin-top:10px;min-height:18px"></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:6px">Your location (for weather)</div>
+        <div class="card-sub" style="margin-bottom:10px">Enter your town or postcode for local weather and garden advice.</div>
+        <input type="text" id="settings-location" placeholder="e.g. Belfast, BT1, Manchester" style="width:100%;margin-bottom:10px">
+        <button class="primary-btn" style="margin-top:0" onclick="saveLocation()">Save location</button>
+        <div id="location-msg" style="font-size:13px;margin-top:10px;min-height:18px"></div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:8px">Where to get your API key</div>
+        <div style="font-size:13px;color:var(--text3);line-height:1.8">
+          1. Go to <span style="color:var(--green2)">console.anthropic.com</span><br>
+          2. Click <strong style="color:var(--text2)">API Keys</strong> in the left sidebar<br>
+          3. Click <strong style="color:var(--text2)">Create Key</strong> and copy it<br>
+          4. Paste it in the field above and save
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="switchPanel('home',this)"><span class="nav-icon">🏡</span><span class="nav-label">Home</span></button>
+    <button class="nav-btn" onclick="switchPanel('analyse',this)"><span class="nav-icon">📷</span><span class="nav-label">Analyse</span></button>
+    <button class="nav-btn" onclick="switchPanel('chat',this)"><span class="nav-icon">💬</span><span class="nav-label">Ask</span></button>
+    <button class="nav-btn" onclick="switchPanel('calendar',this)"><span class="nav-icon">📅</span><span class="nav-label">Calendar</span></button>
+    <button class="nav-btn" onclick="switchPanel('plants',this)"><span class="nav-icon">🌿</span><span class="nav-label">Plants</span></button>
+    <button class="nav-btn" onclick="switchPanel('lawn',this)"><span class="nav-icon">🌱</span><span class="nav-label">Lawn</span></button>
+    <button class="nav-btn" onclick="switchPanel('journal',this)"><span class="nav-icon">📔</span><span class="nav-label">Journal</span></button>
+    <button class="nav-btn" onclick="switchPanel('settings',this)"><span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></button>
+  </nav>
+  <button class="fab" id="fab" style="display:none" onclick="fabAction()">+</button>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-new" style="display:none" onclick="closeModalOnOverlay(event,'modal-new')">
+  <div class="modal">
+    <div class="modal-title">New journal entry</div>
+    <input type="text" id="entry-name" placeholder="Plant name (e.g. Front garden lavender)">
+    <textarea id="entry-notes" placeholder="Notes — how it looks, what you did, any concerns…"></textarea>
+    <div class="modal-actions">
+      <button class="ghost-btn" onclick="closeModal('modal-new')">Cancel</button>
+      <button class="primary-btn" style="flex:1" onclick="saveEntry()">Save entry</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-detail" style="display:none" onclick="closeModalOnOverlay(event,'modal-detail')">
+  <div class="modal" id="modal-detail-content"></div>
+</div>
+<div class="modal-overlay" id="modal-plant" style="display:none" onclick="closeModalOnOverlay(event,'modal-plant')">
+  <div class="modal" id="modal-plant-content"></div>
+</div>
+<div class="modal-overlay" id="modal-add-water" style="display:none" onclick="closeModalOnOverlay(event,'modal-add-water')">
+  <div class="modal">
+    <div class="modal-title">Add plant to tracker</div>
+    <input type="text" id="water-plant-name" placeholder="Plant name (e.g. Front lavender)" style="width:100%;margin-bottom:10px">
+    <label class="planner-label">Watering frequency</label>
+    <select id="water-freq" style="width:100%;margin-bottom:16px">
+      <option value="1">Every day</option><option value="2">Every 2 days</option>
+      <option value="3" selected>Every 3 days</option><option value="5">Every 5 days</option>
+      <option value="7">Once a week</option><option value="14">Every 2 weeks</option>
+      <option value="21">Every 3 weeks</option>
+    </select>
+    <div class="modal-actions">
+      <button class="ghost-btn" onclick="closeModal('modal-add-water')">Cancel</button>
+      <button class="primary-btn" style="flex:1" onclick="addWaterPlant()">Add plant</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-user" style="display:none" onclick="closeModalOnOverlay(event,'modal-user')">
+  <div class="modal">
+    <div class="modal-title" id="user-modal-name">Account</div>
+    <p id="user-modal-email" style="font-size:13px;color:var(--text3);margin-bottom:16px"></p>
+    <button class="ghost-btn" style="width:100%;margin-bottom:8px" onclick="signOut()">Sign out</button>
+    <button class="ghost-btn" style="width:100%" onclick="closeModal('modal-user')">Close</button>
+  </div>
+</div>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut as fbSignOut,createUserWithEmailAndPassword,signInWithEmailAndPassword,sendPasswordResetEmail,updateProfile}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getFirestore,collection,addDoc,getDocs,deleteDoc,doc,query,orderBy,where}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ── REPLACE WITH YOUR FIREBASE CONFIG ──
+const firebaseConfig={
+    apiKey: "AIzaSyAoIyuc2B1xrP1SuaDlFGO2lBEucMJCELY",
+    authDomain: "my-recipe-book-3a723.firebaseapp.com",
+    projectId: "my-recipe-book-3a723",
+    storageBucket: "my-recipe-book-3a723.firebasestorage.app",
+    messagingSenderId: "521647012627",
+    appId: "1:521647012627:web:4e1cbc6ea55dcc1acb78e6"
+};
+
+const fbApp=initializeApp(firebaseConfig);
+const auth=getAuth(fbApp);
+const db=getFirestore(fbApp);
+let currentUser=null,journalEntries=[],waterPlants=[];
+let imageBase64=null,imageMime='image/jpeg',pendingSaveResult=null;
+let chatHistory=[],calMonth=new Date().getMonth(),currentPanel='home';
+
+// AUTH
+const AE={'auth/invalid-email':'Please enter a valid email.','auth/user-not-found':'No account found with that email.','auth/wrong-password':'Incorrect password.','auth/email-already-in-use':'That email already has an account.','auth/weak-password':'Password must be at least 6 characters.','auth/too-many-requests':'Too many attempts — try again later.','auth/invalid-credential':'Email or password is incorrect.'};
+const showAuthError=msg=>{const el=document.getElementById('auth-error');el.style.color='#e07070';el.textContent=msg;};
+window.showAuthTab=tab=>{
+  document.getElementById('form-signin').style.display=tab==='signin'?'block':'none';
+  document.getElementById('form-register').style.display=tab==='register'?'block':'none';
+  const si=document.getElementById('tab-signin'),re=document.getElementById('tab-register');
+  si.style.background=tab==='signin'?'rgba(126,184,90,0.2)':'transparent';si.style.color=tab==='signin'?'#a3d47a':'#6a8060';si.style.fontWeight=tab==='signin'?'500':'400';
+  re.style.background=tab==='register'?'rgba(126,184,90,0.2)':'transparent';re.style.color=tab==='register'?'#a3d47a':'#6a8060';
+  document.getElementById('auth-error').textContent='';
+};
+window.signInEmail=async()=>{
+  const e=document.getElementById('signin-email').value.trim(),p=document.getElementById('signin-password').value;
+  if(!e||!p){showAuthError('Please enter your email and password.');return;}
+  try{await signInWithEmailAndPassword(auth,e,p);}catch(err){showAuthError(AE[err.code]||'Sign in failed.');}
+};
+window.registerEmail=async()=>{
+  const n=document.getElementById('reg-name').value.trim(),e=document.getElementById('reg-email').value.trim(),p=document.getElementById('reg-password').value;
+  if(!e||!p){showAuthError('Please fill in all fields.');return;}
+  try{const c=await createUserWithEmailAndPassword(auth,e,p);if(n)await updateProfile(c.user,{displayName:n});}
+  catch(err){showAuthError(AE[err.code]||'Registration failed.');}
+};
+window.forgotPassword=async()=>{
+  const e=document.getElementById('signin-email').value.trim();
+  if(!e){showAuthError('Enter your email address above first.');return;}
+  try{await sendPasswordResetEmail(auth,e);const el=document.getElementById('auth-error');el.style.color='#a3d47a';el.textContent='Reset email sent — check your inbox.';}
+  catch(err){showAuthError(AE[err.code]||'Could not send reset email.');}
+};
+window.signInWithGoogle=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(e){showAuthError('Google sign in failed.');}};
+window.skipAuth=()=>{document.getElementById('auth-screen').style.display='none';document.getElementById('app').style.display='flex';initApp();};
+window.showUserMenu=()=>{if(!currentUser)return;document.getElementById('user-modal-name').textContent=currentUser.displayName||'Account';document.getElementById('user-modal-email').textContent=currentUser.email||'';document.getElementById('modal-user').style.display='flex';};
+window.signOut=async()=>{await fbSignOut(auth);closeModal('modal-user');document.getElementById('auth-screen').style.display='flex';document.getElementById('app').style.display='none';currentUser=null;journalEntries=[];waterPlants=[];};
+onAuthStateChanged(auth,user=>{
+  currentUser=user;
+  if(user){
+    document.getElementById('auth-screen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    const n=user.displayName||user.email?.split('@')[0]||'Gardener';
+    document.getElementById('topbar-sub').textContent=n;
+    document.getElementById('user-btn').textContent=n[0].toUpperCase();
+    initApp();
+  }
+});
+
+async function initApp(){
+  calMonth=new Date().getMonth();
+  loadWeather();renderCalendar();renderHomeMonth();renderPlants();renderPests();
+  await loadJournal();loadWaterPlants();
+  const k=localStorage.getItem('gardenai_anthropic_key');if(k)document.getElementById('settings-key').value=k;
+  const l=localStorage.getItem('gardenai_location');if(l)document.getElementById('settings-location').value=l;
+  setTimeout(()=>checkNotifications(),800);
+}
+
+// NAV
+window.switchPanel=(name,btn)=>{
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  currentPanel=name;
+  document.getElementById('fab').style.display=(name==='journal'||name==='watering')?'flex':'none';
+  if(name==='calendar')renderCalendar();
+  if(name==='watering')renderWaterPlants();
+  if(name==='lawn')renderLawnPanel();
+};
+window.navTo=name=>{
+  const btns=[...document.querySelectorAll('.nav-btn')];
+  const btn=btns.find(b=>b.querySelector('.nav-label')?.textContent.toLowerCase().replace(' ','')===name.toLowerCase())||null;
+  switchPanel(name,btn);
+};
+window.fabAction=()=>{if(currentPanel==='journal')openNewEntry();else if(currentPanel==='watering')document.getElementById('modal-add-water').style.display='flex';};
+
+// WEATHER
+async function loadWeather(){
+  const loc=localStorage.getItem('gardenai_location')||'Belfast';
+  try{
+    const geo=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(loc)}&count=1&language=en`);
+    const gd=await geo.json();
+    if(!gd.results?.length)return;
+    const{latitude,longitude,name}=gd.results[0];
+    const wr=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,precipitation&daily=precipitation_sum,temperature_2m_max&timezone=Europe%2FLondon&forecast_days=1`);
+    const wd=await wr.json();renderWeather(wd,name);
+  }catch(e){}
+}
+const wIcon=c=>c===0?'☀️':c<=2?'⛅':c<=3?'☁️':c<=48?'🌫️':c<=67?'🌧️':c<=77?'❄️':c<=82?'🌦️':c<=99?'⛈️':'🌡️';
+const wDesc=c=>c===0?'Clear sky':c<=2?'Partly cloudy':c<=3?'Overcast':c<=48?'Foggy':c<=67?'Rainy':c<=77?'Snowy':c<=82?'Showers':c<=99?'Thunderstorm':'Variable';
+function gardenAdvice(code,temp,humidity,rain){
+  if(code>=80)return'🌧️ Good day to skip watering — rain will do it. Avoid working on wet soil.';
+  if(code>=51)return'🌦️ Light rain expected. Check drainage and avoid waterlogging tender plants.';
+  if(temp>25)return'☀️ Hot day — water early morning or evening to reduce evaporation. Check containers twice.';
+  if(temp<2)return'❄️ Frost risk! Protect tender plants with fleece. Avoid walking on frozen lawns.';
+  if(temp<5)return'🥶 Near freezing — protect new plantings and containers overnight.';
+  if(humidity>85)return'💧 High humidity — watch for fungal issues on roses. Ensure good air circulation.';
+  if(code===0&&temp>12&&temp<23)return'🌿 Perfect gardening conditions today. Great day to plant, prune, or mow.';
+  return'🌱 Decent conditions today. Check your watering tracker and get outside!';
+}
+function renderWeather(wd,locName){
+  const c=wd.current,temp=Math.round(c.temperature_2m),code=c.weather_code;
+  const humidity=Math.round(c.relative_humidity_2m),wind=Math.round(c.wind_speed_10m);
+  const rain=wd.daily?.precipitation_sum?.[0]||0;
+  document.getElementById('weather-widget').innerHTML=`<div class="weather-card">
+    <div class="weather-main">
+      <div><div style="font-size:12px;color:var(--text3);margin-bottom:2px">${locName}</div><div class="weather-temp">${temp}°C</div><div class="weather-desc">${wDesc(code)}</div></div>
+      <div class="weather-icon">${wIcon(code)}</div>
+    </div>
+    <div class="weather-grid">
+      <div class="weather-stat"><div class="weather-stat-val">${humidity}%</div><div class="weather-stat-lbl">Humidity</div></div>
+      <div class="weather-stat"><div class="weather-stat-val">${wind}km/h</div><div class="weather-stat-lbl">Wind</div></div>
+      <div class="weather-stat"><div class="weather-stat-val">${rain}mm</div><div class="weather-stat-lbl">Rain</div></div>
+    </div>
+    <div class="weather-advice">${gardenAdvice(code,temp,humidity,rain)}</div>
+  </div>`;
+}
+
+// CALENDAR
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const CAL={
+  0:{tasks:[{t:'Mulch tender plants',d:'Apply thick bark or compost around vulnerable plants for frost protection.',c:'amber'},{t:'Plan and order seeds',d:'Order seed catalogues and plan new borders. Best varieties sell out early.',c:'blue'},{t:'Winter prune wisteria',d:'Cut back summer side-shoots to 2-3 buds from the main framework.',c:'green'},{t:'Check overwintering plants',d:'Ventilate greenhouse plants on milder days to prevent fungal issues.',c:'amber'}],tip:'January is about protection and planning. Avoid walking on frozen or waterlogged lawns — it causes long-term compaction damage.'},
+  1:{tasks:[{t:'Start seeds indoors',d:'Sow tomatoes, peppers and aubergines on a sunny windowsill or heated propagator.',c:'green'},{t:'Tidy borders',d:'Remove dead stems left for wildlife — safe to cut back now without disturbing hibernators.',c:'green'},{t:'Check lawn drainage',d:'Aerate persistently waterlogged areas with a garden fork.',c:'amber'},{t:'Feed garden birds',d:'Natural food still scarce — keep feeders topped up.',c:'blue'}],tip:'February can still bring hard frosts. Don\'t plant out too early. Cold frames can start brassica seeds now.'},
+  2:{tasks:[{t:'Overseed bare lawn patches',d:'March is ideal — soil warming but moisture still reliable. Choose a mix for your conditions.',c:'green'},{t:'First lawn mow',d:'Cut on highest setting, no more than a third off. Helps thicken the sward.',c:'green'},{t:'Prune roses',d:'Cut to outward-facing buds. Remove dead, damaged and crossing stems.',c:'amber'},{t:'Feed the lawn',d:'Apply spring/summer fertiliser (high nitrogen) once growth starts.',c:'green'},{t:'Plant summer bulbs',d:'Dahlias and gladioli from mid-March if frost risk is low.',c:'green'}],tip:'March is the busiest month to get ahead. A good lawn feed now sets up your grass for the whole season.'},
+  3:{tasks:[{t:'Feed shrubs and borders',d:'Apply balanced slow-release fertiliser. Good for lavender, hebes, and heathers.',c:'green'},{t:'Harden off seedlings',d:'Move trays outside for a few hours daily to acclimatise before planting out.',c:'blue'},{t:'Control weeds early',d:'Hoe weeds before they flower and seed. Tackle bindweed with repeated cutting.',c:'amber'},{t:'Plant heathers and hebes',d:'Ideal time — soil warm enough and moisture reliable.',c:'green'},{t:'Lawn edging',d:'Re-define edges with a half-moon cutter for a crisp, professional finish.',c:'blue'}],tip:'April is prime planting time. Most new shrubs planted now establish well before summer heat. Water in thoroughly.'},
+  4:{tasks:[{t:'Plant out tender bedding',d:'After last frost (usually mid-May in England), plant out dahlias and summer bedding.',c:'green'},{t:'Chelsea Chop',d:'Cut back summer perennials like sedums by half to delay flowering and create bushy plants.',c:'blue'},{t:'Water new plants',d:'Newly planted shrubs need watering every 2-3 days in dry spells for their first season.',c:'amber'},{t:'Apply lawn weedkiller',d:'Treat dandelions and daisies with selective lawn weedkiller in warm weather.',c:'amber'}],tip:'May is often dry in southern England. New plantings are vulnerable — check the soil around them every 2-3 days.'},
+  5:{tasks:[{t:'Mow lawns twice weekly',d:'In peak growth, mow more frequently rather than cutting more off each time.',c:'green'},{t:'Deadhead roses',d:'Remove spent flowers promptly to encourage repeat flowering all summer.',c:'green'},{t:'Water deeply not often',d:'One deep weekly watering beats daily light watering — encourages deep roots.',c:'blue'},{t:'Feed container plants',d:'Pots need weekly liquid feeding with balanced or high-potash feed until September.',c:'amber'}],tip:'June can bring dry spells. Lawns go brown but always recover. Focus water on new plants and containers.'},
+  6:{tasks:[{t:'Trim lavender after flowering',d:'Cut off spent flower spikes lightly — never cut into old brown wood.',c:'green'},{t:'Collect rainwater',d:'Use collected water and avoid mains on established lawns.',c:'blue'},{t:'Watch for vine weevil',d:'Check containers — larvae damage roots. Use nematodes in warm soil.',c:'amber'},{t:'Harvest regularly',d:'Pick fruit and veg frequently to encourage continued cropping.',c:'green'}],tip:'July is peak pest month. Check plants weekly for aphids, slugs, and caterpillars.'},
+  7:{tasks:[{t:'Take semi-ripe cuttings',d:'August is ideal for propagating lavender, hebe, heather, and sarcococca.',c:'green'},{t:'Plan autumn planting',d:'Order spring bulbs and autumn-planted shrubs now for best choice.',c:'blue'},{t:'Continue feeding containers',d:'Keep feeding pots weekly until end of September.',c:'amber'},{t:'Late lawn feed',d:'Apply summer lawn feed before end of August — too late risks frost-vulnerable growth.',c:'green'}],tip:'Late August is great for taking cuttings from your lavender, hebes, and ornamental grasses.'},
+  8:{tasks:[{t:'Overseed the lawn',d:'September is the best month — warm soil, reliable rain, establishes before winter.',c:'green'},{t:'Plant spring bulbs',d:'Plant daffodils, tulips, alliums and crocuses now for spring colour.',c:'green'},{t:'Divide perennials',d:'Lift and divide overcrowded ornamental grasses, sedums and perennials.',c:'green'},{t:'Plant new shrubs',d:'Autumn planting gives roots time to establish before spring growth.',c:'green'}],tip:'September is arguably the best planting month in the UK. Cool soil, reliable rain, roots establish all winter.'},
+  9:{tasks:[{t:'Raise mower height',d:'Cut on a higher setting for the last few mows — protects roots from frost.',c:'amber'},{t:'Rake up leaves',d:'Remove fallen leaves from the lawn — they block light and cause yellow patches.',c:'amber'},{t:'Protect tender plants',d:'Move tender plants into a greenhouse or sheltered spot before first frosts.',c:'amber'},{t:'Plant garlic',d:'October is ideal for planting garlic cloves in well-drained soil.',c:'green'}],tip:'October is when the garden winds down. A great time to tidy and mulch borders for winter protection.'},
+  10:{tasks:[{t:'Apply autumn lawn feed',d:'Use low-nitrogen, high-potassium autumn formula to harden up grass for winter.',c:'green'},{t:'Mulch borders',d:'Apply 5-7cm of compost or bark to protect roots and suppress weeds.',c:'green'},{t:'Plant tulip bulbs',d:'November is ideal for tulips — late planting reduces tulip fire disease risk.',c:'green'},{t:'Prune fruit trees',d:'Once leaves have fallen, prune apples and pears to shape and remove dead wood.',c:'blue'}],tip:'Planting in November is still very effective. The ground is usually workable and plants establish roots all winter.'},
+  11:{tasks:[{t:'Check winter plants',d:'Winter heaths and sarcococca should be at their best — check for pests or waterlogging.',c:'blue'},{t:'Order seeds for next year',d:'Best varieties sell out early — browse catalogues and order now.',c:'blue'},{t:'Protect pots from frost',d:'Wrap terracotta pots with bubble wrap or move under cover to prevent cracking.',c:'amber'},{t:'Avoid heavy foot traffic',d:'Stay off waterlogged or frozen lawns to prevent soil compaction.',c:'amber'}],tip:'December: assess your garden from indoors. Plan for more winter interest with sarcococca, winter heath, and hellebores.'},
+};
+
+window.changeMonth=dir=>{calMonth=(calMonth+dir+12)%12;renderCalendar();};
+
+// Task tick state — keyed by "YYYY-M-taskIndex", reset each new month
+function getTaskKey(monthIdx,taskIdx){return`task-${new Date().getFullYear()}-${monthIdx}-${taskIdx}`;}
+function isTaskDone(monthIdx,taskIdx){return localStorage.getItem(getTaskKey(monthIdx,taskIdx))==='1';}
+function setTaskDone(monthIdx,taskIdx,done){
+  if(done)localStorage.setItem(getTaskKey(monthIdx,taskIdx),'1');
+  else localStorage.removeItem(getTaskKey(monthIdx,taskIdx));
+}
+// Auto-reset previous month's tasks
+function cleanOldTasks(){
+  const now=new Date(),yr=now.getFullYear(),mo=now.getMonth();
+  const stored=localStorage.getItem('gardenai_task_month');
+  const current=`${yr}-${mo}`;
+  if(stored!==current){
+    // Clear all task keys from previous months
+    Object.keys(localStorage).filter(k=>k.startsWith('task-')&&!k.startsWith(`task-${yr}-${mo}-`)).forEach(k=>localStorage.removeItem(k));
+    localStorage.setItem('gardenai_task_month',current);
+  }
+}
+function countPendingTasks(monthIdx){
+  return CAL[monthIdx].tasks.filter((_,i)=>!isTaskDone(monthIdx,i)).length;
+}
+window.toggleTask=(monthIdx,taskIdx)=>{
+  const done=isTaskDone(monthIdx,taskIdx);
+  setTaskDone(monthIdx,taskIdx,!done);
+  renderCalendar();
+  if(monthIdx===new Date().getMonth())renderHomeMonth();
+};
+
+function renderCalendar(){
+  cleanOldTasks();
+  const d=CAL[calMonth];
+  document.getElementById('month-title').textContent=MONTHS[calMonth];
+  document.getElementById('calendar-tasks').innerHTML=d.tasks.map((t,i)=>{
+    const done=isTaskDone(calMonth,i);
+    return`<div class="task-item" style="opacity:${done?0.45:1};transition:opacity 0.2s" onclick="toggleTask(${calMonth},${i})">
+      <div style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;border:1.5px solid ${done?'var(--green)':'var(--border2)'};background:${done?'var(--green)':'transparent'};flex-shrink:0;margin-top:2px;transition:all 0.2s">
+        ${done?'<span style="color:#0f1a0f;font-size:13px;font-weight:700">✓</span>':''}
+      </div>
+      <div><div class="task-title" style="${done?'text-decoration:line-through;color:var(--text3)':''}">${t.t}</div><div class="task-desc">${t.d}</div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('seasonal-tip').textContent=d.tip;
+  const pending=countPendingTasks(calMonth);
+  const total=d.tasks.length;
+  const done=total-pending;
+  const counts={green:0,amber:0,blue:0};
+  d.tasks.forEach((t,i)=>{if(!isTaskDone(calMonth,i))counts[t.c]++;});
+  document.getElementById('urgency-bar').innerHTML=`
+    ${done===total?'<span class="badge badge-green">✓ All done this month!</span>':''}
+    ${counts.green?`<span class="badge badge-green">🌱 ${counts.green} to do</span>`:''}
+    ${counts.amber?`<span class="badge badge-amber">⚠ ${counts.amber} check</span>`:''}
+    ${counts.blue?`<span class="badge badge-blue">ℹ ${counts.blue} note</span>`:''}
+    ${done>0&&done<total?`<span class="badge" style="background:rgba(126,184,90,0.1);color:var(--text3)">${done}/${total} done</span>`:''}`;
+}
+function renderHomeMonth(){
+  cleanOldTasks();
+  const mo=new Date().getMonth();
+  const d=CAL[mo];
+  const pending=countPendingTasks(mo);
+  const total=d.tasks.length;
+  document.getElementById('home-month-tasks').innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-family:var(--font-serif);font-size:15px;color:var(--green3)">${MONTHS[mo]}</div>
+      ${pending<total?`<span class="badge badge-green">${total-pending}/${total} done</span>`:''}
+    </div>
+    ${d.tasks.slice(0,3).map((t,i)=>{
+      const done=isTaskDone(mo,i);
+      return`<div class="task-item" style="opacity:${done?0.45:1};transition:opacity 0.2s" onclick="toggleTask(${mo},${i})">
+        <div style="display:flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:5px;border:1.5px solid ${done?'var(--green)':'var(--border2)'};background:${done?'var(--green)':'transparent'};flex-shrink:0;margin-top:3px;transition:all 0.2s">
+          ${done?'<span style="color:#0f1a0f;font-size:11px;font-weight:700">✓</span>':''}
+        </div>
+        <div><div class="task-title" style="${done?'text-decoration:line-through;color:var(--text3)':''}">${t.t}</div><div class="task-desc">${t.d}</div></div>
+      </div>`;
+    }).join('')}
+    <div style="margin-top:10px"><button class="ghost-btn" style="font-size:12px" onclick="navTo('calendar')">See all tasks →</button></div>`;
+}
+
+
+// LAWN CARE DATA
+const LAWN_MONTHS={
+  0:{name:'January',tasks:[
+    {icon:'🚫',name:'No feeding',desc:'Lawn is dormant — do not apply any fertiliser. It will sit unused and may cause algae.',tags:[]},
+    {icon:'👣',name:'Avoid foot traffic',desc:'Stay off frozen or waterlogged grass completely. Compaction and frost damage on wet turf causes long-term damage.',tags:['mow']},
+    {icon:'🔍',name:'Plan your programme',desc:'Order lawn products for the year ahead. Check your mower blade is sharp — blunt blades tear rather than cut.',tags:[]},
+  ],tip:'January is lawn rest month. The only job is staying off it when frozen or wet.'},
+  1:{name:'February',tasks:[
+    {icon:'🍃',name:'Light rake',desc:'On a dry day, lightly rake to remove any dead grass (thatch) that has built up over winter.',tags:['aerate']},
+    {icon:'🌡️',name:'Watch for frost',desc:'Still too cold to do any real work. Wait until soil temperature is consistently above 5°C before any treatment.',tags:[]},
+    {icon:'🔧',name:'Mower service',desc:'Get your mower serviced or sharpen blades now before the season starts. Set blade to 40mm for first cuts.',tags:['mow']},
+  ],tip:'February is preparation month. Service equipment and have your spring products ready to go for March.'},
+  2:{name:'March',tasks:[
+    {icon:'✂️',name:'First mow of the year',desc:'Once grass starts growing, cut on highest setting (40–50mm). Never remove more than a third of the blade.',tags:['mow']},
+    {icon:'🌿',name:'Spring lawn feed',desc:'Apply high-nitrogen spring feed once soil temperature reaches 8–10°C and grass is actively growing. Brands: Evergreen Complete, Miracle-Gro Lawn Food.',tags:['feed']},
+    {icon:'⚗️',name:'Iron sulphate for moss',desc:'Apply ferrous sulphate if moss is present. Mix 35g per litre, apply evenly. Moss blackens and dies within 2 weeks — rake out thoroughly.',tags:['iron']},
+    {icon:'🌾',name:'Overseed bare patches',desc:'Scratch bare areas with a rake, apply seed at 35g per sq metre, firm down and keep moist. Use a ryegrass mix for hard-wearing areas.',tags:['seed']},
+    {icon:'📐',name:'Re-edge the lawn',desc:'Re-define edges with a half-moon edging iron for a crisp, professional finish after winter.',tags:[]},
+  ],tip:'March is the most important lawn month. A good spring feed and moss treatment now sets the lawn up for the whole season.'},
+  3:{name:'April',tasks:[
+    {icon:'✂️',name:'Increase mowing frequency',desc:'Mow weekly as growth accelerates. Gradually lower blade to 30–35mm but never below 25mm.',tags:['mow']},
+    {icon:'🌱',name:'Weed control',desc:'Apply selective lawn weedkiller when weeds are actively growing and weather is settled above 10°C. Targets dandelions, daisies, clover, plantain.',tags:['weed']},
+    {icon:'🪡',name:'Scarify light thatch',desc:'If thatch layer is more than 10mm, give the lawn a light scarify with a spring-tine rake or mechanical scarifier.',tags:['aerate']},
+    {icon:'💧',name:'Start watering if dry',desc:'April can be dry. New grass and overseeded areas need watering every 2–3 days if no rain.',tags:[]},
+  ],tip:'April weed control is very effective — weeds are growing fast and absorb weedkiller quickly. Do not mow 3 days before or after applying.'},
+  4:{name:'May',tasks:[
+    {icon:'✂️',name:'Mow twice weekly',desc:'Peak growth period — mow twice a week to keep on top of growth rather than cutting more off each time.',tags:['mow']},
+    {icon:'🌿',name:'Second lawn feed',desc:'Apply a second dose of spring/summer feed 6–8 weeks after the first application if growth has slowed.',tags:['feed']},
+    {icon:'🌱',name:'Spot-treat weeds',desc:'Spot treat any remaining weeds with selective weedkiller. Concentrated formulas work well on stubborn plants.',tags:['weed']},
+    {icon:'📐',name:'Lawn edging',desc:'Keep edges crisp with weekly trimming using long-handled edging shears or a half-moon tool.',tags:[]},
+  ],tip:'May is the peak growing month. Little and often is the rule — mow frequently, cut less.'},
+  5:{name:'June',tasks:[
+    {icon:'✂️',name:'Mow regularly',desc:'Continue mowing twice weekly. If dry spell hits, raise cutting height to 50mm to reduce stress on roots.',tags:['mow']},
+    {icon:'💧',name:'Water deeply if dry',desc:'One deep watering per week (20–30 minutes) is better than daily light watering. Water early morning to reduce evaporation.',tags:[]},
+    {icon:'🌿',name:'Feed if not done in May',desc:'Apply summer lawn feed if you missed May application. Stop feeding after end of August.',tags:['feed']},
+    {icon:'🚫',name:'Let brown lawns recover',desc:'A brown lawn in drought is not dead — grass goes dormant. Do not scalp it trying to remove brown. It will recover when rain returns.',tags:[]},
+  ],tip:'June drought tip: raise your mowing height and stop worrying about a brown lawn. It always comes back.'},
+  6:{name:'July',tasks:[
+    {icon:'✂️',name:'Mow at higher setting',desc:'Keep blades high (50mm) during hot, dry spells. Taller grass shades roots and retains moisture better.',tags:['mow']},
+    {icon:'💧',name:'Water new turf only',desc:'Established lawns can go without watering. Focus water on newly laid or overseeded areas only.',tags:[]},
+    {icon:'🔍',name:'Check for pest damage',desc:'Yellowing patches that lift away easily indicate leatherjacket or chafer grub damage. Birds pecking at the lawn is a warning sign.',tags:[]},
+    {icon:'🚫',name:'No weedkiller in heat',desc:'Do not apply weedkiller in high temperatures or drought — it can scorch the grass. Wait for cooler, settled weather.',tags:['weed']},
+  ],tip:'July is the month to do as little as possible to your lawn. Raise the blade, water if essential, and let it rest.'},
+  7:{name:'August',tasks:[
+    {icon:'🌿',name:'Last summer feed',desc:'Apply the final summer feed before end of August. After this, switch to autumn formula. Do not feed later — it promotes soft growth vulnerable to frost.',tags:['feed']},
+    {icon:'🦠',name:'Apply leatherjacket nematodes',desc:'August–October is the window for Steinernema feltiae nematodes. Soil must be above 10°C and moist. Water in well and keep damp for 2 weeks.',tags:['repair']},
+    {icon:'🌾',name:'Prepare for overseeding',desc:'Late August: scarify lightly and prepare bare areas ready for September overseeding. Order seed now.',tags:['seed']},
+    {icon:'✂️',name:'Gradually lower mower',desc:'As temperatures cool, gradually lower cutting height back towards 35–40mm.',tags:['mow']},
+  ],tip:'End of August is a critical transition point. Get your last summer feed down and have autumn products ready.'},
+  8:{name:'September',tasks:[
+    {icon:'🌾',name:'Overseed the lawn',desc:'The best month of the year for overseeding. Warm soil, reliable rain, and grass establishes before winter. Scarify first, sow at 35g per sq metre, water regularly.',tags:['seed']},
+    {icon:'🪡',name:'Autumn scarification',desc:'Remove thatch and dead material with a mechanical scarifier. The lawn will look terrible for 2 weeks — persist. It recovers fully.',tags:['aerate']},
+    {icon:'🕳️',name:'Aerate compacted areas',desc:'Hollow-tine aerate heavily used or compacted areas. Fill holes with sharp sand to improve drainage long-term.',tags:['aerate']},
+    {icon:'🍂',name:'Apply autumn lawn feed',desc:'Switch to autumn formula (high potassium, low nitrogen). Hardens grass, builds root strength, improves winter colour.',tags:['feed']},
+    {icon:'⚗️',name:'Iron sulphate treatment',desc:'Apply ferrous sulphate in September for a second moss treatment and to deepen autumn colour. Rake out dead moss after 2 weeks.',tags:['iron']},
+  ],tip:'September is arguably the most important lawn month after March. Scarify, aerate, overseed and feed — all in one month.'},
+  9:{name:'October',tasks:[
+    {icon:'🍂',name:'Rake leaves promptly',desc:'Remove fallen leaves as soon as they fall. A layer of leaves blocks light and causes yellow, dead patches within weeks.',tags:[]},
+    {icon:'✂️',name:'Raise mower height',desc:'Raise blade to 40–50mm for final autumn cuts. Never cut below 35mm from now until spring.',tags:['mow']},
+    {icon:'🕳️',name:'Final aeration',desc:'Last chance to aerate before ground hardens. Spike aeration with a garden fork is sufficient if you cannot hire a machine.',tags:['aerate']},
+    {icon:'🌾',name:'Last overseed opportunity',desc:'Early October is the final viable window for overseeding. After mid-October soil is too cold for germination.',tags:['seed']},
+    {icon:'🦠',name:'Nematodes if not done',desc:'Last chance for leatherjacket nematodes while soil is still warm enough (above 10°C).',tags:['repair']},
+  ],tip:'October: keep on top of leaves and raise the mower. The lawn needs light through autumn to stay healthy.'},
+  10:{name:'November',tasks:[
+    {icon:'🌿',name:'Apply autumn lawn feed',desc:'If not done in September/October, apply autumn formula now while ground is not frozen. This is the final feed of the year.',tags:['feed']},
+    {icon:'🍂',name:'Continue leaf removal',desc:'Keep removing fallen leaves weekly. Use a leaf blower or rake — do not let them sit.',tags:[]},
+    {icon:'✂️',name:'Final mow of the year',desc:'Give the lawn a final tidy cut at 40mm before growth stops. Leaving it too long over winter encourages disease.',tags:['mow']},
+    {icon:'👣',name:'Reduce foot traffic',desc:'As ground softens, minimise walking on the lawn to prevent compaction and rutting.',tags:[]},
+  ],tip:'November: the lawn year winds down. One last cut, clear the leaves, and leave it alone.'},
+  11:{name:'December',tasks:[
+    {icon:'🚫',name:'No treatments',desc:'Nothing should be applied to the lawn in December. Fertiliser and weedkiller are completely ineffective in cold, dormant conditions.',tags:[]},
+    {icon:'👣',name:'Stay off frozen grass',desc:'Absolutely avoid walking on frozen or frosty lawns. The grass blades are brittle and crush, leaving permanent brown footprint marks.',tags:[]},
+    {icon:'🔍',name:'Plan next year',desc:'Review what worked this year. Order spring feed, seed and iron sulphate products so they are ready for March.',tags:[]},
+    {icon:'🔧',name:'Winter mower storage',desc:'Clean and dry the mower thoroughly. Run engine dry of fuel, or use fuel stabiliser. Sharpen blade over winter.',tags:[]},
+  ],tip:'December: hands off the lawn entirely. Plan, prepare, and wait for March.'},
+};
+
+let lawnSelectedMonth=new Date().getMonth();
+
+function renderLawnPanel(){
+  const grid=document.getElementById('lawn-month-grid');
+  if(!grid)return;
+  grid.innerHTML=MONTHS.map((m,i)=>`
+    <div class="lawn-month-chip ${i===lawnSelectedMonth?'active':''}" onclick="selectLawnMonth(${i})">
+      <div class="lawn-month-chip-name">${m.slice(0,3)}</div>
+      <div class="lawn-month-chip-tasks">${LAWN_MONTHS[i].tasks.length} tasks</div>
+    </div>`).join('');
+  renderLawnMonth();
+}
+window.selectLawnMonth=i=>{lawnSelectedMonth=i;renderLawnPanel();};
+function renderLawnMonth(){
+  const detail=document.getElementById('lawn-month-detail');
+  if(!detail)return;
+  const d=LAWN_MONTHS[lawnSelectedMonth];
+  const tagHtml=tag=>{
+    const map={feed:'lawn-tag-feed',iron:'lawn-tag-iron',weed:'lawn-tag-weed',aerate:'lawn-tag-aerate',mow:'lawn-tag-mow',seed:'lawn-tag-seed',repair:'lawn-tag-repair'};
+    const labels={feed:'Feed',iron:'Iron',weed:'Weed',aerate:'Aerate',mow:'Mow',seed:'Seed',repair:'Pest'};
+    return`<span class="lawn-tag ${map[tag]||''}">${labels[tag]||tag}</span>`;
+  };
+  detail.innerHTML=`
+    <div style="font-family:var(--font-serif);font-size:17px;color:var(--green2);margin-bottom:12px">${d.name}</div>
+    ${d.tasks.map(t=>`
+      <div class="lawn-task-row">
+        <div class="lawn-task-icon">${t.icon}</div>
+        <div>
+          <div class="lawn-task-name">${t.name}</div>
+          <div class="lawn-task-desc">${t.desc}</div>
+          <div style="margin-top:4px">${t.tags.map(tagHtml).join('')}</div>
+        </div>
+      </div>`).join('')}
+    <div class="lawn-tip-box">💡 ${d.tip}</div>`;
+}
+
+
+// PLANT DATABASE
+const PLANTS=[
+  {name:'Lavender',latin:'Lavandula angustifolia',emoji:'💜',tags:['Full sun','Drought tolerant','Fragrant','Pollinator'],sun:'Full sun',water:'Low',soil:'Well-drained, alkaline',hardiness:'Hardy',flowering:'June–August',height:'60–90cm',care:'Trim lightly after flowering — never cut into old wood. Feed with balanced fertiliser in spring. Excellent in gravel gardens.',problems:'Becomes woody and splits if not pruned annually. Root rot in wet soils.',tips:'Plant in gravel or raised beds if your soil is heavy clay. Lavender Hidcote is compact and reliable.'},
+  {name:'Hebe',latin:'Hebe spp.',emoji:'🌸',tags:['Evergreen','Coastal','Low maintenance','Pollinator'],sun:'Full sun to partial shade',water:'Low–medium',soil:'Any well-drained',hardiness:'Hardy to -10°C',flowering:'June–October',height:'30cm–1.5m',care:'Minimal pruning — remove dead or damaged stems in spring. Feed in spring. Excellent for coastal gardens.',problems:'Can suffer in prolonged hard frosts. Downy mildew in wet conditions.',tips:'Hebe Autumn Glory and Great Orme are reliable UK choices. Cut back leggy plants hard in spring.'},
+  {name:'Pieris Forest Flame',latin:'Pieris japonica',emoji:'🔥',tags:['Acid-loving','Evergreen','Spring colour','Woodland'],sun:'Partial shade',water:'Medium',soil:'Acidic, humus-rich',hardiness:'Hardy',flowering:'March–May',height:'1.5–3m',care:'Requires ericaceous soil. Feed with ericaceous fertiliser in spring. Mulch with pine bark. Use rainwater if possible.',problems:'Leaves yellow in alkaline soil. Frost can damage new red spring growth.',tips:'Plant in a sheltered spot away from cold winds. Use rainwater — hard tap water causes yellowing.'},
+  {name:'Sarcococca',latin:'Sarcococca confusa',emoji:'🌿',tags:['Deep shade','Winter fragrance','Evergreen','Low maintenance'],sun:'Full shade to partial shade',water:'Low–medium',soil:'Any except very dry',hardiness:'Hardy',flowering:'December–February',height:'1–1.5m',care:'Very low maintenance. No pruning needed. Feed in spring. Ideal for dry shade under trees.',problems:'Virtually pest and disease free. May grow slowly in very dry conditions.',tips:'One of the best plants for difficult shaded areas. The winter fragrance from tiny flowers is remarkable.'},
+  {name:'Winter Heath',latin:'Erica carnea',emoji:'🌺',tags:['Winter flowering','Ground cover','Acid-tolerant','Pollinator'],sun:'Full sun',water:'Low',soil:'Acidic to neutral, well-drained',hardiness:'Very hardy',flowering:'November–April',height:'15–30cm',care:'Clip over lightly after flowering to keep compact. Feed with ericaceous fertiliser in spring.',problems:'Will not thrive in very alkaline soils. Becomes straggly if not clipped.',tips:'Unlike most heathers, tolerates slightly alkaline soils. Plant in drifts for winter colour.'},
+  {name:'Ornamental Grass',latin:'Various',emoji:'🌾',tags:['Structural','Low maintenance','Wildlife','Autumn interest'],sun:'Full sun to partial shade',water:'Low',soil:'Most soils',hardiness:'Hardy',flowering:'Varies',height:'30cm–2m',care:'Cut back hard in late February before new growth. Do not cut in autumn — dead stems give winter interest and wildlife habitat.',problems:'Becomes congested after 3-4 years — lift and divide in spring.',tips:'Hakonechloa for shade, Miscanthus for height, Stipa for fine texture. Very drought tolerant once established.'},
+  {name:'Lawn / Grass',latin:'Various species',emoji:'🌱',tags:['Lawn','UK staple','Maintenance'],sun:'Full sun to partial shade',water:'Medium',soil:'Any',hardiness:'Hardy',flowering:'N/A',height:'N/A',care:'Never remove more than a third at once. Feed high-nitrogen in spring, low-nitrogen in autumn. Overseed in March or September. Aerate in autumn.',problems:'Moss in shaded/compacted areas. Brown patches in summer drought. Leatherjackets causing dead patches.',tips:'September is the best time to overseed — warm soil, reliable rain, grass establishes before winter.'},
+  {name:'Rose',latin:'Rosa spp.',emoji:'🌹',tags:['Classic','Fragrant','Flowering','Pollinator'],sun:'Full sun',water:'Medium',soil:'Rich, well-drained',hardiness:'Hardy',flowering:'June–October',height:'Varies',care:'Prune in late February to outward-facing buds. Feed with rose fertiliser in April and after first flush. Deadhead regularly.',problems:'Black spot, aphids, and rust are common. Spray with fungicide preventatively.',tips:'David Austin English roses give the best fragrance and repeat flowering. Plant bare-root November–March.'},
+  {name:'Hydrangea',latin:'Hydrangea macrophylla',emoji:'💙',tags:['Summer flowering','Shade tolerant','Bold'],sun:'Partial shade',water:'High',soil:'Moist, well-drained',hardiness:'Hardy',flowering:'July–September',height:'1–2m',care:'Leave old flower heads over winter to protect buds. Prune in April. Feed in spring.',problems:'Wilts quickly in heat — water heavily. Flowers turn green in too much shade.',tips:'Blue flowers need acidic soil. Add aluminium sulphate to intensify blue. Hydrangea paniculata flowers later.'},
+  {name:'Camellia',latin:'Camellia japonica',emoji:'🌸',tags:['Acid-loving','Winter/spring flower','Evergreen'],sun:'Partial shade, sheltered',water:'Medium',soil:'Acidic, well-drained',hardiness:'Hardy',flowering:'January–April',height:'1.5–4m',care:'Feed with ericaceous fertiliser in spring. Water with rainwater where possible. Prune after flowering.',problems:'Bud drop from summer drought or frost. Yellow leaves from alkaline soil.',tips:'Plant avoiding morning sun — frost-damaged flowers thaw too quickly. East or west-facing walls are ideal.'},
+  {name:'Allium',latin:'Allium spp.',emoji:'🔮',tags:['Spring bulb','Architectural','Pollinator','Easy'],sun:'Full sun',water:'Low',soil:'Well-drained',hardiness:'Hardy',flowering:'May–June',height:'40cm–1.2m',care:'Plant bulbs in autumn at 3x their depth. No feeding needed. Leave seed heads for structure.',problems:'Virtually trouble free.',tips:'Allium hollandicum Purple Sensation and Gladiator are the most reliable and dramatic UK choices.'},
+  {name:'Dahlia',latin:'Dahlia spp.',emoji:'🌺',tags:['Summer/autumn','Cutting flower','Bold'],sun:'Full sun',water:'Medium–high',soil:'Rich, well-drained',hardiness:'Half-hardy',flowering:'July–October',height:'60cm–1.5m',care:'Plant tubers in May after frosts. Stake tall varieties. Deadhead regularly. Lift tubers in November and store frost-free.',problems:'Earwigs, aphids, and slugs. Powdery mildew in dry conditions.',tips:'Bishop of Llandaff is a classic reliable UK variety. Feed with high-potassium liquid feed every 2 weeks from budding.'},
+];
+
+let filteredPlants=[...PLANTS];
+window.filterPlants=()=>{
+  const q=document.getElementById('plant-search').value.toLowerCase();
+  filteredPlants=PLANTS.filter(p=>p.name.toLowerCase().includes(q)||p.tags.some(t=>t.toLowerCase().includes(q)));
+  renderPlants();
+};
+window.renderPlants=()=>{
+  document.getElementById('plant-list').innerHTML=filteredPlants.map(p=>`
+    <div class="plant-card" onclick="showPlant(${PLANTS.indexOf(p)})">
+      <div class="plant-card-header"><div class="plant-emoji">${p.emoji}</div><div><div class="plant-name">${p.name}</div><div class="plant-latin">${p.latin}</div></div></div>
+      <div class="plant-tags">${p.tags.map(t=>`<span class="badge badge-green">${t}</span>`).join('')}</div>
+    </div>`).join('');
+};
+window.showPlant=i=>{
+  const p=PLANTS[i];
+  document.getElementById('modal-plant-content').innerHTML=`
+    <div style="text-align:center;font-size:38px;margin-bottom:8px">${p.emoji}</div>
+    <div class="modal-title" style="text-align:center">${p.name}</div>
+    <div style="font-size:12px;color:var(--text3);text-align:center;font-style:italic;margin-bottom:12px">${p.latin}</div>
+    <div class="plant-tags" style="justify-content:center;margin-bottom:14px">${p.tags.map(t=>`<span class="badge badge-green">${t}</span>`).join('')}</div>
+    <div class="plant-detail-grid">
+      <div class="plant-detail-item"><div class="plant-detail-label">Sun</div><div class="plant-detail-val">${p.sun}</div></div>
+      <div class="plant-detail-item"><div class="plant-detail-label">Water</div><div class="plant-detail-val">${p.water}</div></div>
+      <div class="plant-detail-item"><div class="plant-detail-label">Soil</div><div class="plant-detail-val">${p.soil}</div></div>
+      <div class="plant-detail-item"><div class="plant-detail-label">Height</div><div class="plant-detail-val">${p.height}</div></div>
+      <div class="plant-detail-item"><div class="plant-detail-label">Flowers</div><div class="plant-detail-val">${p.flowering}</div></div>
+      <div class="plant-detail-item"><div class="plant-detail-label">Hardiness</div><div class="plant-detail-val">${p.hardiness}</div></div>
+    </div>
+    <div style="margin-top:12px"><div class="plant-detail-label" style="margin-bottom:5px">Care guide</div><div style="font-size:13px;color:var(--text2);line-height:1.7;background:var(--bg3);border-radius:var(--radius);padding:12px">${p.care}</div></div>
+    <div style="margin-top:10px"><div class="plant-detail-label" style="margin-bottom:5px">Common problems</div><div style="font-size:13px;color:var(--danger);line-height:1.7;background:var(--bg3);border-radius:var(--radius);padding:12px">${p.problems}</div></div>
+    <div style="margin-top:10px"><div class="plant-detail-label" style="margin-bottom:5px">Top tips</div><div style="font-size:13px;color:var(--green3);line-height:1.7;background:var(--bg3);border-radius:var(--radius);padding:12px">${p.tips}</div></div>
+    <div class="modal-actions" style="margin-top:16px"><button class="ghost-btn" style="flex:1" onclick="closeModal('modal-plant')">Close</button></div>`;
+  document.getElementById('modal-plant').style.display='flex';
+};
+
+// PEST GUIDE
+const PESTS=[
+  {name:'Aphids',emoji:'🐛',type:'pest',symptoms:'Clusters of small insects on new shoots. Sticky honeydew residue. Distorted or curled growth.',organic:'Blast off with a strong water jet. Encourage ladybirds. Nasturtiums as a trap crop.',chemical:'Pyrethrin-based insecticide as a last resort.',plants:'Roses, broad beans, lettuces, brassicas.'},
+  {name:'Slugs & Snails',emoji:'🐌',type:'pest',symptoms:'Irregular holes in leaves overnight. Silvery slime trails. Seedlings and hostas worst affected.',organic:'Remove by hand at night with a torch. Beer traps. Copper tape around pots. Nematodes in warm soil.',chemical:'Iron phosphate slug pellets (safer for wildlife than metaldehyde).',plants:'Hostas, seedlings, strawberries, dahlias.'},
+  {name:'Vine Weevil',emoji:'🪲',type:'pest',symptoms:'Notches around leaf edges. Wilting and collapse — roots eaten by C-shaped larvae. Worst in containers.',organic:'Steinernema kraussei nematodes applied to moist compost in August–October.',chemical:'Imidacloprid vine weevil drench for containers.',plants:'Heucheras, sedums, strawberries, cyclamen in pots.'},
+  {name:'Leatherjackets',emoji:'🪱',type:'lawn',symptoms:'Brown patches in lawn after wet autumns. Starlings and crows pecking at lawn. Grass pulls up easily.',organic:'Soak area, cover overnight with black plastic — larvae surface and birds eat them.',chemical:'Steinernema feltiae nematodes in August–October.',plants:'Lawn grass.'},
+  {name:'Chafer Grubs',emoji:'🐛',type:'lawn',symptoms:'Brown dead patches. Foxes and badgers digging up lawn to find them.',organic:'Heterorhabditis bacteriophora nematodes in June–July.',chemical:'No licensed chemical controls currently for home use.',plants:'Lawn grass.'},
+  {name:'Black Spot (Rose)',emoji:'🌹',type:'disease',symptoms:'Black spots on rose leaves with yellow halos. Leaves drop early, weakening the plant.',organic:'Remove and bin affected leaves. Improve air circulation. Mulch around base.',chemical:'Fungicide containing myclobutanil or trifloxystrobin from spring.',plants:'Roses.'},
+  {name:'Powdery Mildew',emoji:'⬜',type:'disease',symptoms:'White powdery coating on leaves, stems and buds. Worst in dry conditions. Stunted growth.',organic:'Improve air circulation. Water at base. Remove badly affected growth.',chemical:'Spray with fungicide containing tebuconazole.',plants:'Roses, courgettes, peas, gooseberries, hydrangeas.'},
+  {name:'Honey Fungus',emoji:'🍄',type:'disease',symptoms:'Plants suddenly die. White fungal sheet under bark at soil level. Black bootlace rhizomorphs in soil.',organic:'No cure — remove and destroy affected plants including all roots.',chemical:'No effective chemical control.',plants:'Most woody plants — trees and shrubs. Privet very susceptible.'},
+  {name:'Red Spider Mite',emoji:'🕷️',type:'pest',symptoms:'Pale mottling on leaves. Tiny mites on leaf undersides. Fine webbing in severe cases. Worst in hot, dry conditions.',organic:'Increase humidity — mist plants. Phytoseiulus persimilis predatory mites in greenhouses.',chemical:'Repeat applications of approved miticide needed.',plants:'Beans, cucumbers, tomatoes, strawberries — especially under glass.'},
+  {name:'Moss in Lawn',emoji:'🌿',type:'lawn',symptoms:'Low green carpet growth in lawn. Worse in shade, damp, compacted or acidic areas.',organic:'Rake out in spring or autumn. Improve drainage by aerating. Overseed after raking.',chemical:'Apply lawn mosskiller containing ferrous sulphate. Rake out dead moss after 2 weeks.',plants:'Lawn grass.'},
+  {name:'Boxwood Blight',emoji:'🌿',type:'disease',symptoms:'Brown spots on box leaves, white fungal growth underneath. Rapid defoliation.',organic:'Remove all affected material and bin it. Improve air circulation.',chemical:'Fungicide sprays can slow spread but not cure.',plants:'Box (Buxus) hedging and topiary.'},
+];
+
+let currentPestFilter='all';
+window.filterPests=type=>{currentPestFilter=type;renderPests();};
+window.renderPests=()=>{
+  const filtered=currentPestFilter==='all'?PESTS:PESTS.filter(p=>p.type===currentPestFilter);
+  document.getElementById('pest-list').innerHTML=filtered.map(p=>`
+    <div class="pest-card" onclick="togglePest(${PESTS.indexOf(p)})">
+      <div class="pest-header"><div class="pest-emoji">${p.emoji}</div><div><div class="pest-name">${p.name}</div><span class="badge ${p.type==='pest'?'badge-amber':p.type==='lawn'?'badge-green':'badge-red'}">${p.type}</span></div></div>
+      <div class="pest-detail" id="pest-${PESTS.indexOf(p)}">
+        <div class="pest-section-title">Symptoms</div><div style="font-size:13px;color:var(--text2);line-height:1.6">${p.symptoms}</div>
+        <div class="pest-section-title">Organic control</div><div style="font-size:13px;color:var(--green2);line-height:1.6">${p.organic}</div>
+        <div class="pest-section-title">Chemical control</div><div style="font-size:13px;color:var(--amber2);line-height:1.6">${p.chemical}</div>
+        <div class="pest-section-title">Commonly affects</div><div style="font-size:13px;color:var(--text3);line-height:1.6">${p.plants}</div>
+      </div>
+    </div>`).join('');
+};
+window.togglePest=i=>{const el=document.getElementById('pest-'+i);if(el)el.classList.toggle('open');};
+
+// WATERING
+function loadWaterPlants(){try{waterPlants=JSON.parse(localStorage.getItem('gardenai_water'))||[];}catch(e){waterPlants=[];}renderWaterPlants();}
+function saveWaterPlants(){localStorage.setItem('gardenai_water',JSON.stringify(waterPlants));}
+window.addWaterPlant=()=>{
+  const name=document.getElementById('water-plant-name').value.trim();
+  const freq=parseInt(document.getElementById('water-freq').value);
+  if(!name)return;
+  waterPlants.push({id:Date.now().toString(),name,freq,lastWatered:null});
+  saveWaterPlants();renderWaterPlants();closeModal('modal-add-water');
+  document.getElementById('water-plant-name').value='';
+};
+window.waterNow=id=>{const p=waterPlants.find(p=>p.id===id);if(p){p.lastWatered=new Date().toISOString();saveWaterPlants();renderWaterPlants();}};
+window.deleteWaterPlant=id=>{waterPlants=waterPlants.filter(p=>p.id!==id);saveWaterPlants();renderWaterPlants();};
+function waterStatus(p){
+  if(!p.lastWatered)return{label:'Water now',cls:'water-due'};
+  const days=Math.floor((Date.now()-new Date(p.lastWatered))/(86400000));
+  const rem=p.freq-days;
+  if(rem<=0)return{label:'Water now',cls:'water-due'};
+  if(rem===1)return{label:'Due tomorrow',cls:'water-soon'};
+  return{label:`Due in ${rem} days`,cls:'water-ok'};
+}
+function renderWaterPlants(){
+  const list=document.getElementById('water-list'),empty=document.getElementById('water-empty');
+  if(!waterPlants.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=waterPlants.map(p=>{
+    const s=waterStatus(p);
+    const last=p.lastWatered?`Last watered: ${formatDate(p.lastWatered)}`:'Never watered';
+    return`<div class="water-plant">
+      <div class="water-plant-top"><div><div class="water-plant-name">${escHtml(p.name)}</div><div class="water-last">${last} · Every ${p.freq} day${p.freq>1?'s':''}</div></div><span class="water-status ${s.cls}">${s.label}</span></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="water-btn" onclick="waterNow('${p.id}')">💧 Watered</button>
+        <button class="water-btn" style="color:var(--danger);border-color:rgba(224,112,112,0.3)" onclick="deleteWaterPlant('${p.id}')">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// PLANNER
+window.runPlanner=async()=>{
+  const space=document.getElementById('plan-space').value,sun=document.getElementById('plan-sun').value,soil=document.getElementById('plan-soil').value,goal=document.getElementById('plan-goal').value,notes=document.getElementById('plan-notes').value;
+  if(!space||!sun||!soil||!goal){document.getElementById('planner-result').innerHTML='<div class="result-box" style="color:var(--amber2)">Please fill in all required fields above.</div>';return;}
+  const btn=document.querySelector('#panel-planner .primary-btn');
+  btn.disabled=true;btn.innerHTML='<span class="loading-spinner"></span>Planning…';
+  document.getElementById('planner-result').innerHTML='';
+  const prompt=`You are an expert UK gardening planner. Based on these garden conditions, suggest the best plants and scheme.
+Space type: ${space}
+Sun exposure: ${sun}
+Soil type: ${soil}
+Main goal: ${goal}
+${notes?'Additional notes: '+notes:''}
+Current month: ${MONTHS[new Date().getMonth()]}
+
+Provide:
+**Recommended plants:** (6-8 specific plants with variety names and brief reason)
+**Planting scheme:** (how to arrange them, what goes where)
+**When to plant:** (timing for each, considering current month)
+**Maintenance overview:** (what this planting will need through the year)
+**Bonus tips:** (specific to these conditions)
+
+Be specific with UK variety names. All advice must be UK-relevant.`;
+  try{
+    const result=await callAnthropic({messages:[{role:'user',content:prompt}]});
+    document.getElementById('planner-result').innerHTML=`<div class="result-box"><h4>Your planting plan</h4>${formatMarkdown(result)}</div>`;
+  }catch(e){
+    const ple=apiErrorMsg(e);
+    document.getElementById('planner-result').innerHTML=`<div class="result-box" style="color:var(--danger)">${ple.icon} ${ple.text}${ple.retry?'<br><br><button class="ghost-btn" style="font-size:13px;margin-top:4px" onclick="runPlanner()">↻ Try again</button>':''}${ple.key?'<br><br><button class="ghost-btn" style="font-size:13px;margin-top:4px" onclick="goToSettings()">Open Settings →</button>':''}</div>`;
+  }
+  btn.disabled=false;btn.textContent='Get planting suggestions';
+};
+
+// PHOTO ANALYSIS
+window.handleFile=e=>{
+  const file=e.target.files[0];if(!file)return;
+  imageMime=file.type||'image/jpeg';
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    imageBase64=ev.target.result.split(',')[1];
+    document.getElementById('preview-img').src=ev.target.result;
+    document.getElementById('preview-wrap').style.display='block';
+    document.getElementById('analyse-btn').disabled=false;
+    document.getElementById('upload-zone').style.display='none';
+  };
+  reader.readAsDataURL(file);
+};
+window.removeImage=()=>{
+  imageBase64=null;
+  document.getElementById('preview-wrap').style.display='none';
+  document.getElementById('upload-zone').style.display='block';
+  document.getElementById('file-input').value='';
+  document.getElementById('analyse-btn').disabled=true;
+  document.getElementById('photo-result').innerHTML='';
+  pendingSaveResult=null;
+};
+window.analysePhoto=async()=>{
+  if(!imageBase64)return;
+  const plantType=document.getElementById('plant-type').value,concern=document.getElementById('concern').value;
+  const btn=document.getElementById('analyse-btn');
+  btn.disabled=true;btn.innerHTML='<span class="loading-spinner"></span>Analysing…';
+  document.getElementById('photo-result').innerHTML='';
+  const prompt=`You are an expert UK gardener and plant diagnostician. Analyse this photo.
+${plantType?'Plant type: '+plantType:''}${concern?'\nConcern: '+concern:''}
+Respond with:
+**What I can see:** (1-2 sentences on the plant/lawn and any visible issues)
+**Diagnosis:** (what is going on, if anything)
+**Action steps:** (3-5 numbered, specific, UK-relevant tips)
+**Seasonal note:** (relevant for current UK month: ${MONTHS[new Date().getMonth()]})
+Keep it practical and direct.`;
+  try{
+    const resp=await callAnthropic({messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMime,data:imageBase64}},{type:'text',text:prompt}]}]});
+    pendingSaveResult=resp;
+    document.getElementById('photo-result').innerHTML=`<div class="result-box"><h4>Analysis result</h4>${formatMarkdown(resp)}</div><div class="save-row"><input type="text" id="save-name" placeholder="Name this plant (optional)"><button class="ghost-btn" onclick="saveToJournal()">Save to journal</button></div>`;
+  }catch(err){
+    const pe=apiErrorMsg(err);
+    document.getElementById('photo-result').innerHTML=`<div class="result-box" style="color:var(--danger)">${pe.icon} ${pe.text}${pe.retry?'<br><br><button class="ghost-btn" style="font-size:13px;margin-top:4px" onclick="analysePhoto()">↻ Try again</button>':''}${pe.key?'<br><br><button class="ghost-btn" style="font-size:13px;margin-top:4px" onclick="goToSettings()">Open Settings →</button>':''}</div>`;
+  }
+  btn.disabled=false;btn.textContent='Analyse Photo';
+};
+
+// CHAT
+window.sendQuick=text=>{document.getElementById('chat-input').value=text;sendChat();};
+window.sendChat=async()=>{
+  const input=document.getElementById('chat-input'),text=input.value.trim();
+  if(!text)return;input.value='';
+  const msgs=document.getElementById('chat-msgs'),sendBtn=document.getElementById('send-btn');
+  sendBtn.disabled=true;
+  chatHistory.push({role:'user',content:text});
+  msgs.innerHTML+=`<div class="msg user">${escHtml(text)}</div><div class="msg ai typing" id="ai-typing">Thinking…</div>`;
+  msgs.scrollTop=msgs.scrollHeight;
+  try{
+    const reply=await callAnthropic({
+      system:`You are a friendly, knowledgeable UK gardening expert. Give practical, specific, actionable advice tailored to UK climate. Current month: ${MONTHS[new Date().getMonth()]}. Be direct and concise.`,
+      messages:chatHistory.map(m=>({role:m.role,content:m.content}))
+    });
+    chatHistory.push({role:'assistant',content:reply});
+    document.getElementById('ai-typing')?.remove();
+    msgs.innerHTML+=`<div class="msg ai">${formatMarkdown(reply)}</div>`;
+  }catch(e){
+    document.getElementById('ai-typing')?.remove();
+    const ce=apiErrorMsg(e);msgs.innerHTML+=`<div class="msg ai" style="color:var(--danger)">${ce.icon} ${ce.text}</div>`;
+  }
+  sendBtn.disabled=false;msgs.scrollTop=msgs.scrollHeight;
+};
+
+// JOURNAL
+window.openNewEntry=()=>{document.getElementById('entry-name').value='';document.getElementById('entry-notes').value='';document.getElementById('modal-new').style.display='flex';};
+window.saveToJournal=async()=>{
+  if(!pendingSaveResult)return;
+  const btn=document.querySelector('.save-row .ghost-btn');
+  if(btn){btn.textContent='Saving…';btn.disabled=true;}
+  const name=document.getElementById('save-name').value.trim()||'Plant analysis';
+  const entry={name,notes:pendingSaveResult,imageData:imageBase64?'data:'+imageMime+';base64,'+imageBase64:null,date:new Date().toISOString(),type:'analysis'};
+  try{
+    await persistEntry(entry);
+    document.getElementById('photo-result').innerHTML+='<p style="color:var(--green2);font-size:13px;margin-top:8px">✓ Saved to journal</p>';
+    pendingSaveResult=null;
+  }catch(e){
+    document.getElementById('photo-result').innerHTML+='<p style="color:var(--danger);font-size:13px;margin-top:8px">Save failed — please try again.</p>';
+    if(btn){btn.textContent='Save to journal';btn.disabled=false;}
+  }
+};
+window.saveEntry=async()=>{
+  const name=document.getElementById('entry-name').value.trim()||'Garden note';
+  const notes=document.getElementById('entry-notes').value.trim();
+  if(!notes)return;
+  try{await persistEntry({name,notes,imageData:null,date:new Date().toISOString(),type:'note'});closeModal('modal-new');}
+  catch(e){alert('Save failed — please try again.');}
+};
+async function persistEntry(entry){
+  const imageData=entry.imageData,forFS={...entry,imageData:null};
+  if(currentUser){
+    const ref=await addDoc(collection(db,'journal'),{...forFS,uid:currentUser.uid});
+    if(imageData){try{localStorage.setItem('gardenai_img_'+ref.id,imageData);}catch(e){}}
+    journalEntries.unshift({...entry,imageData,id:ref.id});
+  }else{
+    const id=Date.now().toString();entry.id=id;journalEntries.unshift(entry);
+    try{localStorage.setItem('gardenai_journal',JSON.stringify(journalEntries.map(e=>({...e,imageData:null}))));}catch(e){}
+    if(imageData){try{localStorage.setItem('gardenai_img_'+id,imageData);}catch(e){}}
+  }
+  renderJournal();
+}
+async function loadJournal(){
+  if(currentUser){
+    try{
+      const q=query(collection(db,'journal'),where('uid','==',currentUser.uid),orderBy('date','desc'));
+      const snap=await getDocs(q);
+      journalEntries=snap.docs.map(d=>{const data={...d.data(),id:d.id};const img=localStorage.getItem('gardenai_img_'+d.id);if(img)data.imageData=img;return data;});
+    }catch(e){journalEntries=[];}
+  }else{
+    try{journalEntries=JSON.parse(localStorage.getItem('gardenai_journal'))||[];}catch(e){journalEntries=[];}
+    journalEntries=journalEntries.map(e=>{const img=localStorage.getItem('gardenai_img_'+e.id);if(img)e.imageData=img;return e;});
+  }
+  renderJournal();
+}
+function renderJournal(){
+  const list=document.getElementById('journal-list'),empty=document.getElementById('journal-empty');
+  if(!journalEntries.length){list.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  list.innerHTML=journalEntries.map(e=>`<div class="journal-entry" onclick="showEntry('${e.id}')"><div class="entry-header"><div class="entry-title">${escHtml(e.name)}</div><div class="entry-date">${formatDate(e.date)}</div></div><div class="entry-preview">${escHtml(e.notes)}</div>${e.imageData?`<img class="entry-img" src="${e.imageData}" alt="">`:''}
+  </div>`).join('');
+}
+window.showEntry=id=>{
+  const e=journalEntries.find(j=>j.id===id);if(!e)return;
+  document.getElementById('modal-detail-content').innerHTML=`<div class="modal-title">${escHtml(e.name)}</div><div style="font-size:12px;color:var(--text3);margin-bottom:12px">${formatDate(e.date)}</div>${e.imageData?`<img class="entry-detail-img" src="${e.imageData}" alt="">`:''}<div class="entry-detail-content">${formatMarkdown(e.notes)}</div><div class="modal-actions" style="margin-top:16px"><button class="delete-btn" onclick="deleteEntry('${id}')">Delete</button><button class="ghost-btn" style="flex:1" onclick="closeModal('modal-detail')">Close</button></div>`;
+  document.getElementById('modal-detail').style.display='flex';
+};
+window.deleteEntry=async id=>{
+  if(currentUser){try{await deleteDoc(doc(db,'journal',id));}catch(e){}}
+  localStorage.removeItem('gardenai_img_'+id);
+  journalEntries=journalEntries.filter(e=>e.id!==id);
+  if(!currentUser)localStorage.setItem('gardenai_journal',JSON.stringify(journalEntries));
+  renderJournal();closeModal('modal-detail');
+};
+
+// SETTINGS
+window.saveApiKey=()=>{
+  const key=document.getElementById('settings-key').value.trim(),msg=document.getElementById('settings-msg');
+  if(!key){msg.style.color='var(--danger)';msg.textContent='Please enter a key.';return;}
+  if(!key.startsWith('sk-ant-')){msg.style.color='var(--danger)';msg.textContent='That doesn\'t look like a valid Anthropic key.';return;}
+  localStorage.setItem('gardenai_anthropic_key',key);
+  msg.style.color='var(--green2)';msg.textContent='✓ Key saved — you\'re good to go!';
+};
+window.toggleKeyVisibility=()=>{const i=document.getElementById('settings-key');i.type=i.type==='password'?'text':'password';};
+window.saveLocation=()=>{
+  const loc=document.getElementById('settings-location').value.trim(),msg=document.getElementById('location-msg');
+  if(!loc){msg.style.color='var(--danger)';msg.textContent='Please enter a location.';return;}
+  localStorage.setItem('gardenai_location',loc);
+  msg.style.color='var(--green2)';msg.textContent='✓ Location saved — refreshing weather…';
+  setTimeout(()=>{loadWeather();msg.textContent='';},500);
+};
+
+
+// NOTIFICATIONS
+function checkNotifications(){
+  const today=new Date().toDateString();
+  const notifShown=localStorage.getItem('gardenai_notif_date');
+  if(notifShown===today)return;
+  localStorage.setItem('gardenai_notif_date',today);
+  const now=new Date();
+  const isFirstOfMonth=now.getDate()===1;
+  const lastSeasonalMonth=localStorage.getItem('gardenai_seasonal_month');
+  const thisMonth=`${now.getFullYear()}-${now.getMonth()}`;
+  if(isFirstOfMonth||(lastSeasonalMonth!==thisMonth)){
+    localStorage.setItem('gardenai_seasonal_month',thisMonth);
+    const d=CAL[now.getMonth()];
+    const topTask=d.tasks[0];
+    const pending=countPendingTasks(now.getMonth());if(pending===0)return;showNotif({type:'seasonal',icon:'📅',title:`${MONTHS[now.getMonth()]} garden tasks`,msg:`${pending} task${pending>1?'s':''} still to do this month. Next up: ${topTask.t}.`,actions:[{label:'See tasks',cls:'primary',fn:()=>navTo('calendar')},{label:'Dismiss',cls:'ghost',fn:null}]});
+  }
+  try{
+    const plants=JSON.parse(localStorage.getItem('gardenai_water'))||[];
+    const due=plants.filter(p=>{
+      if(!p.lastWatered)return true;
+      const days=Math.floor((Date.now()-new Date(p.lastWatered))/86400000);
+      return days>=p.freq;
+    });
+    if(due.length){
+      const names=due.slice(0,3).map(p=>p.name).join(', ')+(due.length>3?` +${due.length-3} more`:'');
+      setTimeout(()=>{
+        showNotif({type:'water',icon:'💧',title:`${due.length} plant${due.length>1?'s':''} need watering`,msg:names,actions:[{label:'Go to tracker',cls:'primary',fn:()=>navTo('watering')},{label:'Dismiss',cls:'ghost',fn:null}]});
+      },isFirstOfMonth?4000:600);
+    }
+  }catch(e){}
+}
+function showNotif({type,icon,title,msg,actions}){
+  const container=document.getElementById('notif-container');
+  const id='notif-'+Date.now();
+  const actionsHtml=actions.map((a,i)=>`<button class="notif-action ${a.cls}" onclick="handleNotifAction('${id}',${i})">${a.label}</button>`).join('');
+  const el=document.createElement('div');
+  el.className=`notif-banner ${type}`;el.id=id;
+  el.innerHTML=`<div class="notif-icon">${icon}</div><div class="notif-body"><div class="notif-title">${title}</div><div class="notif-msg">${msg}</div><div class="notif-actions">${actionsHtml}</div></div><button class="notif-close" onclick="dismissNotif('${id}')">✕</button>`;
+  el._actions=actions;
+  container.appendChild(el);
+  setTimeout(()=>dismissNotif(id),12000);
+}
+window.handleNotifAction=(id,idx)=>{const el=document.getElementById(id);if(el?._actions?.[idx]?.fn)el._actions[idx].fn();dismissNotif(id);};
+window.dismissNotif=id=>{const el=document.getElementById(id);if(!el)return;el.style.animation='notifOut 0.25s ease forwards';setTimeout(()=>el.remove(),260);};
+
+// HELPERS
+async function callAnthropic(payload){
+  const key=localStorage.getItem('gardenai_anthropic_key');
+  if(!key)throw new Error('NO_KEY');
+  let data;
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,...payload})});
+    data=await resp.json();
+  }catch(e){throw new Error('NETWORK');}
+  if(data.error){
+    const msg=data.error.message||'';
+    const type=data.error.type||'';
+    if(type==='authentication_error'||msg.toLowerCase().includes('api key')||msg.toLowerCase().includes('auth'))throw new Error('BAD_KEY');
+    if(type==='rate_limit_error'||msg.toLowerCase().includes('rate limit')||msg.toLowerCase().includes('overloaded'))throw new Error('RATE_LIMIT');
+    if(type==='overloaded_error')throw new Error('RATE_LIMIT');
+    throw new Error('API:'+msg);
+  }
+  return data.content?.find(b=>b.type==='text')?.text||'';
+}
+function apiErrorMsg(e){
+  if(e.message==='NO_KEY')return{icon:'🔑',text:'No API key set — tap ⚙️ Settings to add your key.',key:true};
+  if(e.message==='BAD_KEY')return{icon:'🔑',text:'API key rejected — check your key is correct in ⚙️ Settings.',key:true};
+  if(e.message==='RATE_LIMIT')return{icon:'⏱️',text:'Anthropic is busy or rate limited — wait 30 seconds and try again.',retry:true};
+  if(e.message==='NETWORK')return{icon:'📡',text:'Network error — check your connection and try again.',retry:true};
+  if(e.message.startsWith('API:'))return{icon:'⚠️',text:'API error: '+e.message.slice(4),retry:true};
+  return{icon:'⚠️',text:'Something went wrong — please try again.',retry:true};
+}
+function formatMarkdown(t){return t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/^(\d+)\. /gm,'<br><strong>$1.</strong> ').replace(/^- /gm,'• ').replace(/\n/g,'<br>');}
+function escHtml(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function formatDate(iso){return new Date(iso).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
+window.goToSettings=()=>navTo('settings');
+window.closeModal=id=>document.getElementById(id).style.display='none';
+window.closeModalOnOverlay=(e,id)=>{if(e.target===document.getElementById(id))closeModal(id);};
+</script>
+
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/gardenai/sw.js');}
+</script>
+</body>
+</html>
